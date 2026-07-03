@@ -1,12 +1,10 @@
+using Config;
 using Snake;
 using UnityEngine;
 using TMPro;
 
 namespace UI
 {
-    /// <summary>
-    /// HUD：关卡号、蛇长、占用率、目标、教学提示
-    /// </summary>
     public class HUDController : MonoBehaviour
     {
         [Header("文本")]
@@ -40,7 +38,7 @@ namespace UI
 
         private void RefreshAll()
         {
-            var cfg = gm?.CurrentLevelConfig;
+            LevelConfig cfg = gm?.CurrentLevelConfig;
             if (cfg == null) return;
 
             if (levelText != null)

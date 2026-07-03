@@ -17,7 +17,7 @@ namespace Gameplay
 
         private Grid.GridManager gridManager;
         private readonly List<Vector2Int> foodPositions = new();
-        private readonly List<GameObject> foodVisuals = new();
+        private readonly Dictionary<Vector2Int, GameObject> foodVisuals = new();
 
         public void Init(Grid.GridManager gm)
         {
@@ -27,37 +27,28 @@ namespace Gameplay
         
         public void OnEatFood(Vector2Int pos)
         {
-            for (int i = foodPositions.Count - 1; i >= 0; i--)
+            foodPositions.Remove(pos);
+
+            if (foodVisuals.TryGetValue(pos, out var go))
             {
-                if (foodPositions[i] == pos)
-                {
-                    foodPositions.RemoveAt(i);
-                    break;
-                }
+                if (go != null) Destroy(go);
+                foodVisuals.Remove(pos);
             }
-            // 移除显示
-            for (int i = foodVisuals.Count - 1; i >= 0; i--)
-            {
-                if (foodVisuals[i] != null && Vector2Int.RoundToInt(foodVisuals[i].transform.position) == pos)
-                {
-                    Destroy(foodVisuals[i]);
-                    foodVisuals.RemoveAt(i);
-                    break;
-                }
-            }
-            
+
             RefreshFoods();
         }
         
         public void RefreshFoods()
         {
-            var exclude = new HashSet<Vector2Int>();
+            HashSet<Vector2Int> exclude = new HashSet<Vector2Int>();
             foreach (var fp in foodPositions) exclude.Add(fp);
             
             SnakeController snake = FindObjectOfType<SnakeController>();
             if (snake != null)
+            {
                 foreach (Vector2Int bp in snake.BodyPositions)
                     exclude.Add(bp);
+            }
 
             List<Vector2Int> spawnable = gridManager.GetSpawnableCells(exclude);
             int totalFree = spawnable.Count + foodPositions.Count;
@@ -76,7 +67,7 @@ namespace Gameplay
                 if (foodPrefab != null)
                 {
                     var go = Instantiate(foodPrefab, gridManager.GridToWorld(pos), Quaternion.identity);
-                    foodVisuals.Add(go);
+                    foodVisuals[pos] = go;
                 }
             }
         }
@@ -84,17 +75,13 @@ namespace Gameplay
         private int CalculateTarget(int spawnableCount)
         {
             if (spawnableCount >= richThreshold) return Random.Range(minFoodWhenRich, maxFoodWhenRich + 1);
-            
             return Mathf.Max(1, Mathf.FloorToInt(spawnableCount * 0.1f));
         }
 
         private void ClearAll()
         {
-            foreach (GameObject v in foodVisuals)
-            {
+            foreach (var v in foodVisuals.Values)
                 if (v != null) Destroy(v);
-            }
-            
             foodVisuals.Clear();
             foodPositions.Clear();
         }

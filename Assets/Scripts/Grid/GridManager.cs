@@ -24,7 +24,7 @@ namespace Grid
         {
             // 清理旧视觉
             if (cellObjects != null)
-                foreach (var go in cellObjects.Values)
+                foreach (GameObject go in cellObjects.Values)
                     if (go != null) Destroy(go);
 
             gridSize = size;
@@ -99,7 +99,7 @@ namespace Grid
         /// <summary>可生成的格子：Empty 但排除 Food 所在格</summary>
         public List<Vector2Int> GetSpawnableCells()
         {
-            return GetEmptyCells(); // Food 也是 Empty 状态？不，Food 是独立状态
+            return GetEmptyCells();
         }
 
         /// <summary>获取所有 Empty 且不是 Food 的格子</summary>

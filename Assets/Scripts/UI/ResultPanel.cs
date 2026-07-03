@@ -5,9 +5,6 @@ using UnityEngine.UI;
 
 namespace UI
 {
-    /// <summary>
-    /// 结算面板：通关/失败、星级、按钮
-    /// </summary>
     public class ResultPanel : MonoBehaviour
     {
         [Header("文本")]
@@ -64,9 +61,12 @@ namespace UI
             if (resultText) resultText.text = $"蛇长: {len}  占用率: {occ:P1}";
 
             if (starImages != null)
+            {
                 for (int i = 0; i < starImages.Length; i++)
-                    if (starImages[i] != null)
-                        starImages[i].enabled = i < stars;
+                {
+                    if (starImages[i] != null) starImages[i].enabled = i < stars;
+                }
+            }
 
             if (nextButton) nextButton.gameObject.SetActive(win);
 

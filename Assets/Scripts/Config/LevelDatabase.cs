@@ -2,9 +2,6 @@ using UnityEngine;
 
 namespace Config
 {
-    /// <summary>
-    /// 管理所有关卡配置
-    /// </summary>
     [CreateAssetMenu(menuName = "MaoMao/Level Database")]
     public class LevelDatabase : ScriptableObject
     {

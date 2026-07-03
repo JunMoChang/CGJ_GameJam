@@ -28,7 +28,7 @@ namespace Core
         [Header("引用")]
         [SerializeField] private SnakeController snakeController;
         [SerializeField] private Grid.GridManager gridManager;
-        [SerializeField] private Gameplay.LevelSpawner levelSpawner;
+        [SerializeField] private LevelSpawner levelSpawner;
         [SerializeField] private ObstacleManager obstacleManager;
 
         public GameState CurrentState { get; private set; } = GameState.MainMenu;
