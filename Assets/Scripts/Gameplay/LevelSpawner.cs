@@ -11,7 +11,7 @@ namespace Gameplay
         [SerializeField] private Grid.GridManager gridManager;
         [SerializeField] private SnakeController snakeController;
         [SerializeField] private FoodManager foodManager;
-        [SerializeField] private Obstacle.ObstacleManager obstacleManager;
+        [SerializeField] private ObstacleManager obstacleManager;
 
         public void BuildLevel(LevelConfig config)
         {

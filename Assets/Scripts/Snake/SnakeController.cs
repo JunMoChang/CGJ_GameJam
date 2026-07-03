@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Gameplay;
 using UnityEngine;
 
 namespace Snake
@@ -10,7 +11,8 @@ namespace Snake
         public float tickInterval = 0.5f;
 
         [Header("预制体")]
-        [SerializeField] private Transform bodyPrefab;
+        [SerializeField] private GameObject headPrefab;
+        [SerializeField] private GameObject bodyPrefab;
 
         [Header("攻击")]
         [SerializeField] private int attackRange = 2;
@@ -18,7 +20,7 @@ namespace Snake
 
         [Header("引用")]
         [SerializeField] private Grid.GridManager gridManager;
-        [SerializeField] private Obstacle.ObstacleManager obstacleManager;
+        [SerializeField] private ObstacleManager obstacleManager;
         
         public event Action<int> OnLengthChanged;// 蛇长变化
         public event Action OnDead;// 死亡
@@ -29,7 +31,8 @@ namespace Snake
         
         private readonly LinkedList<Vector2Int> bodyList = new();
         private readonly HashSet<Vector2Int> bodySet = new();
-        private readonly List<Transform> segmentVisuals = new();
+        private GameObject headVisual;
+        private readonly List<GameObject> bodyVisuals = new();
 
         private Vector2Int currentDirection = Vector2Int.right;
         private Vector2Int pendingDirection = Vector2Int.right;
@@ -65,7 +68,7 @@ namespace Snake
 
         private void Update()
         {
-            if (isGameOver) return;
+            if (isGameOver || bodyList.Count == 0) return;
 
             ReadDirectionInput();
 
@@ -215,6 +218,7 @@ namespace Snake
 
         private void TryAttack()
         {
+            if (bodyList.Count == 0) return;
             if (obstacleManager == null) return;
             if (Time.time - lastAttackTime < attackCooldown) return;
 
@@ -249,26 +253,47 @@ namespace Snake
 
         private void RenderBody()
         {
-            // 补足或删除显示对象
-            while (segmentVisuals.Count < bodyList.Count)
+            if (gridManager == null) return;
+
+            // 蛇头（索引 0）
+            if (headVisual == null && headPrefab != null)
+                headVisual = Instantiate(headPrefab);
+
+            if (headVisual != null)
             {
-                segmentVisuals.Add(bodyPrefab != null ? Instantiate(bodyPrefab) : null);
+                headVisual.transform.position = gridManager.GridToWorld(bodyList.First.Value);
+                headVisual.transform.rotation = Quaternion.Euler(0, 0, DirectionToAngle(currentDirection));
             }
-            while (segmentVisuals.Count > bodyList.Count)
+
+            // 蛇身（索引 1..n-1）
+            int bodyCount = bodyList.Count - 1;
+            while (bodyVisuals.Count < bodyCount)
+                bodyVisuals.Add(bodyPrefab != null ? Instantiate(bodyPrefab) : null);
+            while (bodyVisuals.Count > bodyCount)
             {
-                int lastIdx = segmentVisuals.Count - 1;
-                if (segmentVisuals[lastIdx] != null)
-                    Destroy(segmentVisuals[lastIdx].gameObject);
-                segmentVisuals.RemoveAt(lastIdx);
+                int last = bodyVisuals.Count - 1;
+                if (bodyVisuals[last] != null) Destroy(bodyVisuals[last]);
+                bodyVisuals.RemoveAt(last);
             }
 
             int i = 0;
+            bool skipFirst = true;
             foreach (Vector2Int segment in bodyList)
             {
-                if (segmentVisuals[i] != null && gridManager != null)
-                    segmentVisuals[i].position = gridManager.GridToWorld(segment);
+                if (skipFirst) { skipFirst = false; continue; }
+                if (bodyVisuals[i] != null)
+                    bodyVisuals[i].transform.position = gridManager.GridToWorld(segment);
                 i++;
             }
+        }
+
+        private float DirectionToAngle(Vector2Int dir)
+        {
+            if (dir == Vector2Int.up)    return 0f;
+            if (dir == Vector2Int.down)  return 180f;
+            if (dir == Vector2Int.left)  return 90f;
+            if (dir == Vector2Int.right) return -90f;
+            return 0f;
         }
 
         #endregion

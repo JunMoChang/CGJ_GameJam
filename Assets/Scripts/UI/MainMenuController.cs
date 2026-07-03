@@ -13,7 +13,7 @@ namespace UI
 
         private Core.GameManager gm;
 
-        private void Awake()
+        private void Start()
         {
             gm = Core.GameManager.Instance;
 

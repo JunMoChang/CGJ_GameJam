@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using Config;
+using Gameplay;
 using Snake;
 
 namespace Core
@@ -28,7 +29,7 @@ namespace Core
         [SerializeField] private SnakeController snakeController;
         [SerializeField] private Grid.GridManager gridManager;
         [SerializeField] private Gameplay.LevelSpawner levelSpawner;
-        [SerializeField] private Obstacle.ObstacleManager obstacleManager;
+        [SerializeField] private ObstacleManager obstacleManager;
 
         public GameState CurrentState { get; private set; } = GameState.MainMenu;
         public int CurrentLevelIndex { get; private set; }

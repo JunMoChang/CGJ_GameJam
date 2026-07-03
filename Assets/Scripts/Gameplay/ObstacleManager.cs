@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace Obstacle
+namespace Gameplay
 {
     /// <summary>
     /// 岩石管理：初始生成、随机生成、销毁
@@ -32,27 +32,28 @@ namespace Obstacle
             obstaclePositions.Clear();
         }
 
-        /// <summary>生成初始岩石（排除指定格子）</summary>
+        /// <summary>生成初始岩石</summary>
         public void SpawnInitialObstacles(IEnumerable<Vector2Int> reservedCells)
         {
             if (config == null) return;
 
-            var reserved = new HashSet<Vector2Int>(reservedCells);
-            var candidates = new List<Vector2Int>();
+            HashSet<Vector2Int> reserved = new HashSet<Vector2Int>(reservedCells);
+            List<Vector2Int> candidates = new List<Vector2Int>();
 
             for (int x = 0; x < gridManager.Width; x++)
+            {
                 for (int y = 0; y < gridManager.Height; y++)
                 {
-                    var pos = new Vector2Int(x, y);
-                    if (gridManager.GetState(pos) == Grid.GridCellState.Empty && !reserved.Contains(pos))
-                        candidates.Add(pos);
+                    Vector2Int pos = new Vector2Int(x, y);
+                    if (gridManager.GetState(pos) == Grid.GridCellState.Empty && !reserved.Contains(pos)) candidates.Add(pos);
                 }
+            }
 
             int count = Random.Range(config.minInitialObstacles, config.maxInitialObstacles + 1);
 
             for (int i = 0; i < count && candidates.Count > 0; i++)
             {
-                var valid = candidates.Where(p => !IsAdjacentToObstacle(p)).ToList();
+                List<Vector2Int> valid = candidates.Where(p => !IsAdjacentToObstacle(p)).ToList();
                 if (valid.Count == 0) break;
 
                 int idx = Random.Range(0, valid.Count);

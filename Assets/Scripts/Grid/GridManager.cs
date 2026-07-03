@@ -3,9 +3,6 @@ using UnityEngine;
 
 namespace Grid
 {
-    /// <summary>
-    /// 网格坐标管理、状态查询、坐标转换
-    /// </summary>
     public class GridManager : MonoBehaviour
     {
         private Vector2Int gridSize;
@@ -14,7 +11,9 @@ namespace Grid
 
         [Header("显示")]
         [SerializeField] private float cellSize = 1f;
-        [SerializeField] private Vector2 gridOrigin = Vector2.zero;
+        [SerializeField] private GameObject tilePrefab;
+
+        private Vector2 gridOrigin;
 
         public int Width => gridSize.x;
         public int Height => gridSize.y;
@@ -23,13 +22,31 @@ namespace Grid
 
         public void Init(Vector2Int size)
         {
+            // 清理旧视觉
+            if (cellObjects != null)
+                foreach (var go in cellObjects.Values)
+                    if (go != null) Destroy(go);
+
             gridSize = size;
             cells = new GridCellState[size.x, size.y];
             cellObjects = new Dictionary<Vector2Int, GameObject>();
 
+            // 自动居中：计算原点使网格中心在世界坐标 (0,0)
+            gridOrigin.x = -(size.x * cellSize / 2f - cellSize / 2f);
+            gridOrigin.y = -(size.y * cellSize / 2f - cellSize / 2f);
+
             for (int x = 0; x < size.x; x++)
                 for (int y = 0; y < size.y; y++)
+                {
                     cells[x, y] = GridCellState.Empty;
+
+                    if (tilePrefab != null)
+                    {
+                        var pos = new Vector2Int(x, y);
+                        var tile = Instantiate(tilePrefab, GridToWorld(pos), Quaternion.identity);
+                        cellObjects[pos] = tile;
+                    }
+                }
         }
 
         public bool IsInside(Vector2Int pos)
