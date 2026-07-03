@@ -9,9 +9,6 @@ namespace Snake
         [Header("移动节奏")]
         public float tickInterval = 0.5f;
 
-        [Header("初始状态")]
-        [SerializeField] private int initialLength = 3;
-
         [Header("预制体")]
         [SerializeField] private Transform bodyPrefab;
 
@@ -47,11 +44,6 @@ namespace Snake
         public bool IsRunning => !isGameOver;
         public Vector2Int CurrentDirection => currentDirection;
 
-        private void Start()
-        {
-            InitializeSnake();
-        }
-
         private void OnEnable()
         {
             if (InputManager.Instance != null)
@@ -84,15 +76,13 @@ namespace Snake
                 Tick();
             }
         }
-
-        /// <summary>外部调用：开始移动</summary>
+        
         public void StartMove()
         {
             isGameOver = false;
             tickTimer = 0f;
         }
-
-        /// <summary>外部调用：停止移动</summary>
+        
         public void StopMove()
         {
             isGameOver = true;
@@ -100,19 +90,19 @@ namespace Snake
 
         #region 初始化
 
-        private void InitializeSnake()
+        public void Init(int length)
         {
             bodyList.Clear();
             bodySet.Clear();
-            
+
             Vector2Int headStartPos = gridManager != null ? gridManager.GetInitialHeadPosition() : new Vector2Int(6, 6);
 
-            for (int i = 0; i < initialLength; i++)
+            for (int i = 0; i < length; i++)
             {
-                if (headStartPos.x - (initialLength - 1) < 0)
+                if (headStartPos.x - (length - 1) < 0)
                 {
-                    Debug.LogError($"initialLength({initialLength}) 超出网格左边界，headStartPos.x={headStartPos.x}");
-                    initialLength = headStartPos.x + 1;
+                    Debug.LogError($"initialLength({length}) 超出网格左边界，headStartPos.x={headStartPos.x}");
+                    length = headStartPos.x + 1;
                 }
                 
                 Vector2Int pos = headStartPos - new Vector2Int(i, 0);
@@ -123,8 +113,8 @@ namespace Snake
 
             currentDirection = Vector2Int.right;
             pendingDirection = Vector2Int.right;
-
-            // 更新 GridManager 状态
+            
+            
             if (gridManager != null)
             {
                 bool first = true;
@@ -147,13 +137,9 @@ namespace Snake
         {
             Vector2 raw = InputManager.Instance.GetVector2("Move");
             if (raw == Vector2.zero) return;
-
-            // 禁止斜向：取绝对值更大的轴
-            Vector2Int candidate = Mathf.Abs(raw.x) >= Mathf.Abs(raw.y)
-                ? (raw.x > 0 ? Vector2Int.right : Vector2Int.left)
-                : (raw.y > 0 ? Vector2Int.up : Vector2Int.down);
-
-            // 禁止反向
+            
+            Vector2Int candidate = Mathf.Abs(raw.x) >= Mathf.Abs(raw.y) ? raw.x > 0 ? Vector2Int.right : Vector2Int.left : raw.y > 0 ? Vector2Int.up : Vector2Int.down;
+            
             if (candidate == -currentDirection) return;
 
             pendingDirection = candidate;
@@ -169,21 +155,21 @@ namespace Snake
 
             Vector2Int newHead = bodyList.First.Value + currentDirection;
 
-            // 1. 撞墙
+            // 撞墙
             if (gridManager == null || !gridManager.IsInside(newHead))
             {
                 Die();
                 return;
             }
 
-            // 2. 撞岩石
+            // 撞岩石
             if (gridManager.GetState(newHead) == Grid.GridCellState.Obstacle)
             {
                 Die();
                 return;
             }
 
-            // 3. 撞自己（尾部即将空出的格子不算碰撞）
+            // 撞自己
             Vector2Int tailPos = bodyList.Last.Value;
             bool ateFood = gridManager.GetState(newHead) == Grid.GridCellState.Food;
 
@@ -193,7 +179,7 @@ namespace Snake
                 return;
             }
 
-            // 4. 更新蛇头
+            // 更新蛇头
             if (gridManager != null)
                 gridManager.SetState(bodyList.First.Value, Grid.GridCellState.SnakeBody);
 
@@ -203,7 +189,7 @@ namespace Snake
             if (gridManager != null)
                 gridManager.SetState(newHead, Grid.GridCellState.SnakeHead);
 
-            // 5. 移除尾部或增长
+            // 移除尾部或增长
             if (!ateFood)
             {
                 Vector2Int removed = bodyList.Last.Value;
@@ -218,7 +204,7 @@ namespace Snake
                 OnLengthChanged?.Invoke(bodyList.Count);
             }
 
-            // 6. 刷新显示 & 事件
+            // 刷新显示 & 事件
             RenderBody();
             OnMoved?.Invoke(newHead);
         }

@@ -5,9 +5,6 @@ using Random = UnityEngine.Random;
 
 namespace Gameplay
 {
-    /// <summary>
-    /// 成长道具管理：生成、补充、被吃响应
-    /// </summary>
     public class FoodManager : MonoBehaviour
     {
         [Header("预制体")]
@@ -27,11 +24,9 @@ namespace Gameplay
             gridManager = gm;
             ClearAll();
         }
-
-        /// <summary>蛇吃到食物时调用</summary>
+        
         public void OnEatFood(Vector2Int pos)
         {
-            // 移除食物
             for (int i = foodPositions.Count - 1; i >= 0; i--)
             {
                 if (foodPositions[i] == pos)
@@ -43,32 +38,28 @@ namespace Gameplay
             // 移除显示
             for (int i = foodVisuals.Count - 1; i >= 0; i--)
             {
-                if (foodVisuals[i] != null &&
-                    Vector2Int.RoundToInt(foodVisuals[i].transform.position) == pos)
+                if (foodVisuals[i] != null && Vector2Int.RoundToInt(foodVisuals[i].transform.position) == pos)
                 {
                     Destroy(foodVisuals[i]);
                     foodVisuals.RemoveAt(i);
                     break;
                 }
             }
-
-            // 补充
+            
             RefreshFoods();
         }
-
-        /// <summary>刷新食物到目标数量</summary>
+        
         public void RefreshFoods()
         {
             var exclude = new HashSet<Vector2Int>();
             foreach (var fp in foodPositions) exclude.Add(fp);
-
-            // 排除蛇身
-            var snake = FindObjectOfType<SnakeController>();
+            
+            SnakeController snake = FindObjectOfType<SnakeController>();
             if (snake != null)
-                foreach (var bp in snake.BodyPositions)
+                foreach (Vector2Int bp in snake.BodyPositions)
                     exclude.Add(bp);
 
-            var spawnable = gridManager.GetSpawnableCells(exclude);
+            List<Vector2Int> spawnable = gridManager.GetSpawnableCells(exclude);
             int totalFree = spawnable.Count + foodPositions.Count;
             int target = CalculateTarget(totalFree);
             int need = target - foodPositions.Count;
@@ -92,15 +83,18 @@ namespace Gameplay
 
         private int CalculateTarget(int spawnableCount)
         {
-            if (spawnableCount >= richThreshold)
-                return Random.Range(minFoodWhenRich, maxFoodWhenRich + 1);
+            if (spawnableCount >= richThreshold) return Random.Range(minFoodWhenRich, maxFoodWhenRich + 1);
+            
             return Mathf.Max(1, Mathf.FloorToInt(spawnableCount * 0.1f));
         }
 
         private void ClearAll()
         {
-            foreach (var v in foodVisuals)
+            foreach (GameObject v in foodVisuals)
+            {
                 if (v != null) Destroy(v);
+            }
+            
             foodVisuals.Clear();
             foodPositions.Clear();
         }

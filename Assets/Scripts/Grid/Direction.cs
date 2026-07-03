@@ -2,9 +2,6 @@ using UnityEngine;
 
 namespace Grid
 {
-    /// <summary>
-    /// 四向移动方向，附工具方法
-    /// </summary>
     public enum Direction
     {
         Up,

@@ -3,13 +3,13 @@ using UnityEngine.UI;
 
 namespace UI
 {
-    /// <summary>
-    /// 主菜单：开始、选关、退出
-    /// </summary>
     public class MainMenuController : MonoBehaviour
     {
-        [Header("按钮")]
-        [SerializeField] private Button[] levelButtons; // 5 个关卡按钮
+        [Header("关卡按钮（1-5）")]
+        [SerializeField] private Button[] levelButtons;
+
+        [Header("菜单根节点")]
+        [SerializeField] private GameObject menuRoot;
 
         private Core.GameManager gm;
 
@@ -19,23 +19,17 @@ namespace UI
 
             for (int i = 0; i < levelButtons.Length; i++)
             {
-                int idx = i + 1;
+                int levelIndex = i + 1;
                 if (levelButtons[i] != null)
-                    levelButtons[i].onClick.AddListener(() => gm?.StartLevel(idx));
+                    levelButtons[i].onClick.AddListener(() => OnClickLevel(levelIndex));
             }
-
-            if (gm != null)
-                gm.OnStateChanged += OnStateChanged;
         }
 
-        private void OnDestroy()
+        private void OnClickLevel(int levelIndex)
         {
-            if (gm != null) gm.OnStateChanged -= OnStateChanged;
-        }
-
-        private void OnStateChanged(Core.GameState state)
-        {
-            gameObject.SetActive(state == Core.GameState.MainMenu);
+            gm?.StartLevel(levelIndex);
+            
+            if (menuRoot != null) menuRoot.SetActive(false);
         }
     }
 }

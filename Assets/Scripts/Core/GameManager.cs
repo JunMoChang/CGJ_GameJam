@@ -13,10 +13,7 @@ namespace Core
         Win,
         Lose
     }
-
-    /// <summary>
-    /// 游戏流程：状态切换、关卡进出、胜负判定、占用率
-    /// </summary>
+    
     public class GameManager : MonoBehaviour
     {
         public static GameManager Instance { get; private set; }
@@ -41,8 +38,10 @@ namespace Core
 
         private void Awake()
         {
-            if (Instance == null) Instance = this;
-            else { Destroy(gameObject); return; }
+            if (Instance == null) 
+                Instance = this;
+            else
+                Destroy(gameObject);
         }
 
         private void OnEnable()
@@ -62,17 +61,17 @@ namespace Core
                 snakeController.OnDead -= OnSnakeDead;
             }
         }
-
+        
         public void StartLevel(int levelIndex)
         {
-            var cfg = levelDatabase?.GetLevel(levelIndex);
+            LevelConfig cfg = levelDatabase?.GetLevel(levelIndex);
             if (cfg == null) return;
 
             CurrentLevelIndex = levelIndex;
             SetState(GameState.Playing);
             levelSpawner?.BuildLevel(cfg);
         }
-
+        
         public void RestartLevel() => StartLevel(CurrentLevelIndex);
 
         public void LoadNextLevel()
