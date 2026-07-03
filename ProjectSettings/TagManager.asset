@@ -41,3 +41,21 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Grid
+    uniqueID: 3064539217
+    locked: 0
+  - name: Item
+    uniqueID: 544449591
+    locked: 0
+  - name: Obstacle
+    uniqueID: 364649331
+    locked: 0
+  - name: Snake
+    uniqueID: 2956282877
+    locked: 0
+  - name: Effect
+    uniqueID: 763918635
+    locked: 0
+  - name: UI
+    uniqueID: 401311537
+    locked: 0
