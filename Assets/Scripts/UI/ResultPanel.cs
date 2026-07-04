@@ -8,9 +8,13 @@ namespace UI
     public class ResultPanel : MonoBehaviour
     {
         [Header("文本")]
-        [SerializeField] private TMP_Text titleText;
+        [SerializeField] private TMP_Text lengthText;
         [SerializeField] private TMP_Text resultText;
-
+        
+        [Header("结算背景")]
+        [SerializeField] private Sprite success;
+        [SerializeField] private Sprite failure;
+        
         [Header("星星")]
         [SerializeField] private Image[] starImages;
 
@@ -18,7 +22,8 @@ namespace UI
         [SerializeField] private Button retryButton;
         [SerializeField] private Button nextButton;
         [SerializeField] private Button menuButton;
-
+        
+        [SerializeField] private GameObject mask;
         private Core.GameManager gm;
 
         public void Init(Core.GameManager gameManager)
@@ -37,8 +42,9 @@ namespace UI
             float occ = gm != null ? gm.CalculateOccupancy() : 0f;
             int stars = gm != null ? gm.CalculateStars(occ) : 0;
 
-            if (titleText) titleText.text = "通关!";
-            if (resultText) resultText.text = $"蛇长: {len}\n占用率: {occ:P1}";
+            if (lengthText) lengthText.text = $"{len}";
+            if (resultText) resultText.text = $"{occ:P1}";
+            mask.SetActive(true);
             ShowStars(stars);
             if (nextButton) nextButton.gameObject.SetActive(true);
             gameObject.SetActive(true);
@@ -50,8 +56,9 @@ namespace UI
             int len = snake != null ? snake.Length : 0;
             float occ = gm != null ? gm.CalculateOccupancy() : 0f;
 
-            if (titleText) titleText.text = "失败";
-            if (resultText) resultText.text = $"蛇长: {len}  占用率: {occ:P1}";
+            if (lengthText) lengthText.text = $"{len}";
+            if (resultText) resultText.text = $"{occ:P1}";
+            mask.SetActive(true);
             ShowStars(0);
             if (nextButton) nextButton.gameObject.SetActive(false);
             gameObject.SetActive(true);
@@ -60,6 +67,7 @@ namespace UI
         public void Hide()
         {
             gameObject.SetActive(false);
+            mask.SetActive(false);
         }
 
         private void ShowStars(int count)

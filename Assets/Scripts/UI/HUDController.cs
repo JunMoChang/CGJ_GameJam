@@ -1,3 +1,4 @@
+using Config;
 using Snake;
 using UnityEngine;
 using TMPro;
@@ -10,6 +11,7 @@ namespace UI
         [SerializeField] private TMP_Text levelText;
         [SerializeField] private TMP_Text lengthText;
         [SerializeField] private TMP_Text occupancyText;
+        [SerializeField] private TMP_Text targetText;
 
         [Header("教学")]
         [SerializeField] private GameObject attackTutorial;
@@ -25,11 +27,12 @@ namespace UI
 
         public void RefreshAll()
         {
-            var cfg = gm?.CurrentLevelConfig;
+            LevelConfig cfg = gm?.CurrentLevelConfig;
             if (cfg != null && levelText != null)
                 levelText.text = $"关卡 {cfg.levelIndex}";
             if (attackTutorial != null && cfg != null)
                 attackTutorial.SetActive(cfg.enableAttackTutorial);
+            //targetText.text = $"{cfg.}"
         }
 
         private void Update()

@@ -12,7 +12,7 @@ namespace Grid
 
         [Header("显示")]
         [SerializeField] private float cellSize = 1f;
-        [SerializeField] private GameObject tilePrefab;
+        [SerializeField] private GameObject[] tilePrefab;
 
         private Vector2 gridOrigin;
 
@@ -55,10 +55,11 @@ namespace Grid
                 {
                     cells[x, y] = GridCellState.Empty;
 
-                    if (tilePrefab != null)
+                    if (tilePrefab is { Length: > 0 })
                     {
                         Vector2Int pos = new Vector2Int(x, y);
-                        GameObject tile = Instantiate(tilePrefab, GridToWorld(pos), Quaternion.identity);
+                        int idx = (x + y) % tilePrefab.Length;
+                        GameObject tile = Instantiate(tilePrefab[idx], GridToWorld(pos), Quaternion.identity);
                         cellObjects[pos] = tile;
                     }
                 }

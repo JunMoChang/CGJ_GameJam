@@ -3,9 +3,6 @@ using UnityEngine;
 
 namespace UI
 {
-    /// <summary>
-    /// UI 总管：统一获取 GameManager 并注入给各个 UI 组件，保证时序
-    /// </summary>
     public class UIManager : MonoBehaviour
     {
         [Header("面板引用")]
@@ -69,7 +66,7 @@ namespace UI
 
         private void ShowResult(bool win)
         {
-            if (hud) hud.gameObject.SetActive(false);
+            //if (hud) hud.gameObject.SetActive(false);
             if (win)
                 resultPanel?.ShowWin();
             else
