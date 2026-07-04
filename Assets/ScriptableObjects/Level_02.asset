@@ -14,12 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levelIndex: 2
   gridSize: {x: 8, y: 8}
-  moveInterval: 0.7
+  moveInterval: 1
   initialSnakeLength: 3
   minInitialObstacles: 0
   maxInitialObstacles: 0
   enableRandomObstacleSpawn: 0
   randomObstacleChance: 0.1
-  maxObstacleProportionOfEmptyGrid: 0.2
   safeZoneSize: 5
   enableAttackTutorial: 0
