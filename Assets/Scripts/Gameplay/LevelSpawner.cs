@@ -43,7 +43,10 @@ namespace Gameplay
         public void ClearLevel()
         {
             snakeController?.StopMove();
+            snakeController?.ClearVisuals();
+            foodManager?.ClearAll();
             obstacleManager?.ClearAll();
+            gridManager?.ClearTiles();
         }
     }
 }

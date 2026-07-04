@@ -42,8 +42,8 @@ namespace Grid
 
                     if (tilePrefab != null)
                     {
-                        var pos = new Vector2Int(x, y);
-                        var tile = Instantiate(tilePrefab, GridToWorld(pos), Quaternion.identity);
+                        Vector2Int pos = new Vector2Int(x, y);
+                        GameObject tile = Instantiate(tilePrefab, GridToWorld(pos), Quaternion.identity);
                         cellObjects[pos] = tile;
                     }
                 }
@@ -105,13 +105,12 @@ namespace Grid
         /// <summary>获取所有 Empty 且不是 Food 的格子</summary>
         public List<Vector2Int> GetSpawnableCells(HashSet<Vector2Int> excludePositions)
         {
-            var result = new List<Vector2Int>();
+            List<Vector2Int> result = new List<Vector2Int>();
             for (int x = 0; x < gridSize.x; x++)
                 for (int y = 0; y < gridSize.y; y++)
                 {
-                    var pos = new Vector2Int(x, y);
-                    if (cells[x, y] == GridCellState.Empty && !excludePositions.Contains(pos))
-                        result.Add(pos);
+                    Vector2Int pos = new Vector2Int(x, y);
+                    if (cells[x, y] == GridCellState.Empty && !excludePositions.Contains(pos)) result.Add(pos);
                 }
             return result;
         }
@@ -122,6 +121,16 @@ namespace Grid
             int half = safeZoneSize / 2;
             return pos.x >= headPos.x - half && pos.x <= headPos.x + half
                 && pos.y >= headPos.y - half && pos.y <= headPos.y + half;
+        }
+
+        public void ClearTiles()
+        {
+            if (cellObjects != null)
+            {
+                foreach (var go in cellObjects.Values)
+                    if (go != null) Destroy(go);
+                cellObjects.Clear();
+            }
         }
     }
 }

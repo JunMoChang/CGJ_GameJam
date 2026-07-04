@@ -18,13 +18,19 @@ namespace UI
         private Core.GameManager gm;
         private SnakeController snake;
 
-        private void Start()
+        public void Init(Core.GameManager gameManager)
         {
-            gm = Core.GameManager.Instance;
+            gm = gameManager;
             snake = FindObjectOfType<SnakeController>();
+        }
 
-            if (gm != null)
-                gm.OnStateChanged += _ => RefreshAll();
+        public void RefreshAll()
+        {
+            var cfg = gm?.CurrentLevelConfig;
+            if (cfg != null && levelText != null)
+                levelText.text = $"关卡 {cfg.levelIndex}";
+            if (attackTutorial != null && cfg != null)
+                attackTutorial.SetActive(cfg.enableAttackTutorial);
         }
 
         private void Update()
@@ -32,20 +38,8 @@ namespace UI
             if (gm == null || gm.CurrentState != Core.GameState.Playing) return;
             if (snake != null && lengthText != null)
                 lengthText.text = $"蛇长: {snake.Length}";
-            if (occupancyText != null && gm != null)
+            if (occupancyText != null)
                 occupancyText.text = $"占用率: {gm.CalculateOccupancy():P1}";
-        }
-
-        private void RefreshAll()
-        {
-            LevelConfig cfg = gm?.CurrentLevelConfig;
-            if (cfg == null) return;
-
-            if (levelText != null)
-                levelText.text = $"关卡 {cfg.levelIndex}";
-
-            if (attackTutorial != null)
-                attackTutorial.SetActive(cfg.enableAttackTutorial);
         }
     }
 }

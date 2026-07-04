@@ -41,7 +41,7 @@ namespace Gameplay
         public void RefreshFoods()
         {
             HashSet<Vector2Int> exclude = new HashSet<Vector2Int>();
-            foreach (var fp in foodPositions) exclude.Add(fp);
+            foreach (Vector2Int fp in foodPositions) exclude.Add(fp);
             
             SnakeController snake = FindObjectOfType<SnakeController>();
             if (snake != null)
@@ -58,7 +58,7 @@ namespace Gameplay
             for (int i = 0; i < need && spawnable.Count > 0; i++)
             {
                 int idx = Random.Range(0, spawnable.Count);
-                var pos = spawnable[idx];
+                Vector2Int pos = spawnable[idx];
                 spawnable.RemoveAt(idx);
 
                 foodPositions.Add(pos);
@@ -66,7 +66,7 @@ namespace Gameplay
 
                 if (foodPrefab != null)
                 {
-                    var go = Instantiate(foodPrefab, gridManager.GridToWorld(pos), Quaternion.identity);
+                    GameObject go = Instantiate(foodPrefab, gridManager.GridToWorld(pos), Quaternion.identity);
                     foodVisuals[pos] = go;
                 }
             }
@@ -78,10 +78,12 @@ namespace Gameplay
             return Mathf.Max(1, Mathf.FloorToInt(spawnableCount * 0.1f));
         }
 
-        private void ClearAll()
+        public void ClearAll()
         {
-            foreach (var v in foodVisuals.Values)
+            foreach (GameObject v in foodVisuals.Values)
+            {
                 if (v != null) Destroy(v);
+            }
             foodVisuals.Clear();
             foodPositions.Clear();
         }

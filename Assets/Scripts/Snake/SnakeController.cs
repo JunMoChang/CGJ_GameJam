@@ -198,8 +198,7 @@ namespace Snake
                 Vector2Int removed = bodyList.Last.Value;
                 bodyList.RemoveLast();
                 bodySet.Remove(removed);
-                if (gridManager != null)
-                    gridManager.SetState(removed, Grid.GridCellState.Empty);
+                if (gridManager != null) gridManager.SetState(removed, Grid.GridCellState.Empty);
             }
             else
             {
@@ -294,6 +293,14 @@ namespace Snake
             if (dir == Vector2Int.left)  return 90f;
             if (dir == Vector2Int.right) return -90f;
             return 0f;
+        }
+
+        public void ClearVisuals()
+        {
+            if (headVisual != null) { Destroy(headVisual); headVisual = null; }
+            foreach (var v in bodyVisuals)
+                if (v != null) Destroy(v);
+            bodyVisuals.Clear();
         }
 
         #endregion

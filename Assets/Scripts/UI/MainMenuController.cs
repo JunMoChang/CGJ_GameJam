@@ -8,28 +8,18 @@ namespace UI
         [Header("关卡按钮（1-5）")]
         [SerializeField] private Button[] levelButtons;
 
-        [Header("菜单根节点")]
-        [SerializeField] private GameObject menuRoot;
-
         private Core.GameManager gm;
 
-        private void Start()
+        public void Init(Core.GameManager gameManager)
         {
-            gm = Core.GameManager.Instance;
+            gm = gameManager;
 
             for (int i = 0; i < levelButtons.Length; i++)
             {
                 int levelIndex = i + 1;
                 if (levelButtons[i] != null)
-                    levelButtons[i].onClick.AddListener(() => OnClickLevel(levelIndex));
+                    levelButtons[i].onClick.AddListener(() => gm?.StartLevel(levelIndex));
             }
-        }
-
-        private void OnClickLevel(int levelIndex)
-        {
-            gm?.StartLevel(levelIndex);
-            
-            if (menuRoot != null) menuRoot.SetActive(false);
         }
     }
 }
