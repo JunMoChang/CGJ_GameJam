@@ -121,7 +121,7 @@ namespace Snake
             if (gridManager != null)
             {
                 bool first = true;
-                foreach (var pos in bodyList)
+                foreach (Vector2Int pos in bodyList)
                 {
                     gridManager.SetState(pos, first ? Grid.GridCellState.SnakeHead : Grid.GridCellState.SnakeBody);
                     first = false;
@@ -253,8 +253,7 @@ namespace Snake
         private void RenderBody()
         {
             if (gridManager == null) return;
-
-            // 蛇头（索引 0）
+            
             if (headVisual == null && headPrefab != null)
                 headVisual = Instantiate(headPrefab);
 
@@ -263,8 +262,7 @@ namespace Snake
                 headVisual.transform.position = gridManager.GridToWorld(bodyList.First.Value);
                 headVisual.transform.rotation = Quaternion.Euler(0, 0, DirectionToAngle(currentDirection));
             }
-
-            // 蛇身（索引 1..n-1）
+            
             int bodyCount = bodyList.Count - 1;
             while (bodyVisuals.Count < bodyCount)
                 bodyVisuals.Add(bodyPrefab != null ? Instantiate(bodyPrefab) : null);
@@ -280,9 +278,9 @@ namespace Snake
             foreach (Vector2Int segment in bodyList)
             {
                 if (skipFirst) { skipFirst = false; continue; }
-                if (bodyVisuals[i] != null)
-                    bodyVisuals[i].transform.position = gridManager.GridToWorld(segment);
-                i++;
+                
+                if (bodyVisuals[i] != null) bodyVisuals[i].transform.position = gridManager.GridToWorld(segment);
+                ++i;
             }
         }
 

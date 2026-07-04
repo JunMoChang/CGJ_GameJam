@@ -12,6 +12,7 @@ namespace Gameplay
         [SerializeField] private SnakeController snakeController;
         [SerializeField] private FoodManager foodManager;
         [SerializeField] private ObstacleManager obstacleManager;
+        [SerializeField] private CameraFitter cameraFitter;
 
         public void BuildLevel(LevelConfig config)
         {
@@ -19,6 +20,7 @@ namespace Gameplay
 
             // 网格
             gridManager.Init(config.gridSize);
+            cameraFitter?.FitToGrid(config.gridSize, gridManager.CellSize);
 
             // 蛇
             snakeController.tickInterval = config.moveInterval;
@@ -31,10 +33,10 @@ namespace Gameplay
             // 岩石
             obstacleManager.Init(gridManager, config);
             HashSet<Vector2Int> reserved = new HashSet<Vector2Int>(snakeController.BodyPositions);
-            obstacleManager.SpawnInitialObstacles(reserved);
-
-            // 订阅食物被吃
-            snakeController.OnFoodEaten += pos => foodManager.OnEatFood(pos);
+            obstacleManager.SpawnInitialObstacles(reserved, snakeController.HeadPosition, snakeController.CurrentDirection);
+            
+            snakeController.OnFoodEaten -= OnFoodEaten;
+            snakeController.OnFoodEaten += OnFoodEaten;
 
             // 开始
             snakeController.StartMove();
@@ -42,11 +44,17 @@ namespace Gameplay
 
         public void ClearLevel()
         {
-            snakeController?.StopMove();
-            snakeController?.ClearVisuals();
+            if (snakeController != null) 
+            {
+                snakeController.StopMove();
+                snakeController.ClearVisuals();
+                snakeController.OnFoodEaten -= OnFoodEaten;
+            }
             foodManager?.ClearAll();
             obstacleManager?.ClearAll();
             gridManager?.ClearTiles();
         }
+
+        private void OnFoodEaten(Vector2Int pos) => foodManager.OnEatFood(pos);
     }
 }

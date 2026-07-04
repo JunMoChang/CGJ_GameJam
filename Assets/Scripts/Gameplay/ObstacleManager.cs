@@ -5,9 +5,6 @@ using Random = UnityEngine.Random;
 
 namespace Gameplay
 {
-    /// <summary>
-    /// 岩石管理：初始生成、随机生成、销毁
-    /// </summary>
     public class ObstacleManager : MonoBehaviour
     {
         [Header("预制体")]
@@ -26,18 +23,31 @@ namespace Gameplay
 
         public void ClearAll()
         {
-            foreach (var v in obstacleVisuals.Values)
+            foreach (GameObject v in obstacleVisuals.Values)
+            {
                 if (v != null) Destroy(v);
+            }
             obstacleVisuals.Clear();
             obstaclePositions.Clear();
         }
 
         /// <summary>生成初始岩石</summary>
-        public void SpawnInitialObstacles(IEnumerable<Vector2Int> reservedCells)
+        public void SpawnInitialObstacles(IEnumerable<Vector2Int> reservedCells, Vector2Int snakeHead, Vector2Int snakeDir)
         {
             if (config == null) return;
 
             HashSet<Vector2Int> reserved = new HashSet<Vector2Int>(reservedCells);
+
+            // 教程关：在蛇头正前方 2 格生成一个障碍物
+            if (config.enableAttackTutorial)
+            {
+                Vector2Int tutorialPos = snakeHead + snakeDir * 2;
+                if (gridManager.IsInside(tutorialPos))
+                {
+                    PlaceObstacle(tutorialPos);
+                    reserved.Add(tutorialPos);
+                }
+            }
             List<Vector2Int> candidates = new List<Vector2Int>();
 
             for (int x = 0; x < gridManager.Width; x++)
@@ -50,6 +60,7 @@ namespace Gameplay
             }
 
             int count = Random.Range(config.minInitialObstacles, config.maxInitialObstacles + 1);
+            if (config.enableAttackTutorial) count = Mathf.Max(0, count - 1);
 
             for (int i = 0; i < count && candidates.Count > 0; i++)
             {
@@ -67,6 +78,9 @@ namespace Gameplay
         {
             if (config == null || !config.enableRandomObstacleSpawn) return;
             if (Random.value > config.randomObstacleChance) return;
+            
+            int maxObstacles = Mathf.Max(0, Mathf.FloorToInt(gridManager.EmptyCellCount * config.maxObstacleProportionOfEmptyGrid));
+            if (obstaclePositions.Count >= maxObstacles) return;
 
             var candidates = new List<Vector2Int>();
             for (int x = 0; x < gridManager.Width; x++)
@@ -99,10 +113,11 @@ namespace Gameplay
 
         public bool IsAdjacentToObstacle(Vector2Int pos)
         {
-            var dirs = new[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
-            foreach (var d in dirs)
-                if (obstaclePositions.Contains(pos + d))
-                    return true;
+            Vector2Int[] dirs = new[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
+            foreach (Vector2Int d in dirs)
+            {
+                if (obstaclePositions.Contains(pos + d)) return true;
+            }
             return false;
         }
 
@@ -113,7 +128,7 @@ namespace Gameplay
 
             if (obstaclePrefab != null)
             {
-                var go = Instantiate(obstaclePrefab, gridManager.GridToWorld(pos), Quaternion.identity);
+                GameObject go = Instantiate(obstaclePrefab, gridManager.GridToWorld(pos), Quaternion.identity);
                 obstacleVisuals[pos] = go;
             }
         }

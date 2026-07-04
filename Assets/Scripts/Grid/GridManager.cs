@@ -20,16 +20,23 @@ namespace Grid
         public float CellSize => cellSize;
         public Vector2 Origin => gridOrigin;
 
+        public int EmptyCellCount { get; private set; }
+
         public void Init(Vector2Int size)
         {
-            // 清理旧视觉
             if (cellObjects != null)
+            {
                 foreach (GameObject go in cellObjects.Values)
-                    if (go != null) Destroy(go);
+                {
+                    if (go != null)
+                        Destroy(go);
+                }
+            }
 
             gridSize = size;
             cells = new GridCellState[size.x, size.y];
             cellObjects = new Dictionary<Vector2Int, GameObject>();
+            EmptyCellCount = size.x * size.y;
 
             // 自动居中：计算原点使网格中心在世界坐标 (0,0)
             gridOrigin.x = -(size.x * cellSize / 2f - cellSize / 2f);
@@ -60,10 +67,18 @@ namespace Grid
             return cells[pos.x, pos.y];
         }
 
-        public void SetState(Vector2Int pos, GridCellState state)
+        public void SetState(Vector2Int pos, GridCellState currentState)
         {
             if (!IsInside(pos)) return;
-            cells[pos.x, pos.y] = state;
+
+            bool wasEmpty = cells[pos.x, pos.y] == GridCellState.Empty;
+            bool isEmpty = currentState == GridCellState.Empty;
+
+            cells[pos.x, pos.y] = currentState;
+
+            if (wasEmpty && !isEmpty) EmptyCellCount--;
+            else if (!wasEmpty && isEmpty) EmptyCellCount++;
+            Debug.Log(EmptyCellCount);
         }
 
         public bool IsEmpty(Vector2Int pos)

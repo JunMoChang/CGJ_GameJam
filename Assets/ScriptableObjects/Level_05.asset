@@ -16,9 +16,10 @@ MonoBehaviour:
   gridSize: {x: 14, y: 14}
   moveInterval: 1
   initialSnakeLength: 3
-  minInitialObstacles: 22
+  minInitialObstacles: 34
   maxInitialObstacles: 34
   enableRandomObstacleSpawn: 1
-  randomObstacleChance: 0.1
+  randomObstacleChance: 1
+  maxObstacleProportionOfEmptyGrid: 0.2
   safeZoneSize: 5
   enableAttackTutorial: 0
