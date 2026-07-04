@@ -1,4 +1,3 @@
-using Config;
 using Snake;
 using UnityEngine;
 using TMPro;
