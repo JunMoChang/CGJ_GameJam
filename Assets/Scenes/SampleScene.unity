@@ -2298,8 +2298,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tickInterval: 0.2
-  headPrefab: {fileID: 7164672450722543132, guid: d8740023a7d05044898bc54e6e07938d, type: 3}
+  headPrefab: {fileID: 7164672450722543132, guid: 55b66886239866e44833f6bde1184de2, type: 3}
   bodyPrefab: {fileID: 7164672450722543132, guid: d8740023a7d05044898bc54e6e07938d, type: 3}
+  bodyImage: {fileID: 21300000, guid: dae2b5b418b381848bc9367bdf3d9ab8, type: 3}
+  trailImage: {fileID: 21300000, guid: cb6141d03ceb8524f86bb35d2a0c97bd, type: 3}
+  turnPointImage: {fileID: 21300000, guid: 173d8bd64795c904fa15ab948582e299, type: 3}
   attackRange: 2
   attackCooldown: 0.35
   gridManager: {fileID: 2074276040}
@@ -2723,7 +2726,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57379884654456745a0c9cb839e54aa2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  foodPrefab: {fileID: 5589732807553273404, guid: e206cb62652fc4b4dbe54f2d265ea633, type: 3}
+  foodPrefabs:
+  - {fileID: 7969694855846282672, guid: 38c584a86e72dc94eab219513eb71542, type: 3}
   richThreshold: 30
   minFoodWhenRich: 3
   maxFoodWhenRich: 5
@@ -4006,7 +4010,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cellSize: 1
-  tilePrefab: {fileID: 0}
+  tilePrefab: {fileID: 7395145639665418715, guid: b04b6687ba5a6684ab7f773dc02b9f75, type: 3}
 --- !u!4 &2074276041
 Transform:
   m_ObjectHideFlags: 0

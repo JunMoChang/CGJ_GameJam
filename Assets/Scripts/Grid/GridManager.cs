@@ -8,6 +8,7 @@ namespace Grid
         private Vector2Int gridSize;
         private GridCellState[,] cells;
         private Dictionary<Vector2Int, GameObject> cellObjects;
+        private HashSet<Vector2Int> emptyCells;
 
         [Header("显示")]
         [SerializeField] private float cellSize = 1f;
@@ -37,8 +38,15 @@ namespace Grid
             cells = new GridCellState[size.x, size.y];
             cellObjects = new Dictionary<Vector2Int, GameObject>();
             EmptyCellCount = size.x * size.y;
-
-            // 自动居中：计算原点使网格中心在世界坐标 (0,0)
+            emptyCells = new HashSet<Vector2Int>(EmptyCellCount);
+            for (int x = 0; x < size.x; x++)
+            {
+                for (int y = 0; y < size.y; y++)
+                {
+                    emptyCells.Add(new Vector2Int(x, y));
+                }
+            }
+            
             gridOrigin.x = -(size.x * cellSize / 2f - cellSize / 2f);
             gridOrigin.y = -(size.y * cellSize / 2f - cellSize / 2f);
 
@@ -76,14 +84,8 @@ namespace Grid
 
             cells[pos.x, pos.y] = currentState;
 
-            if (wasEmpty && !isEmpty) EmptyCellCount--;
-            else if (!wasEmpty && isEmpty) EmptyCellCount++;
-            Debug.Log(EmptyCellCount);
-        }
-
-        public bool IsEmpty(Vector2Int pos)
-        {
-            return GetState(pos) == GridCellState.Empty;
+            if (wasEmpty && !isEmpty) { EmptyCellCount--; emptyCells.Remove(pos); }
+            else if (!wasEmpty && isEmpty) { EmptyCellCount++; emptyCells.Add(pos); }
         }
 
         /// <summary>网格坐标 → 世界坐标（格子中心）</summary>
@@ -95,38 +97,21 @@ namespace Grid
                 0f);
         }
 
-        /// <summary>蛇头初始位置: 水平居中偏右、垂直居中</summary>
+        /// <summary>蛇头初始位置</summary>
         public Vector2Int GetInitialHeadPosition()
         {
             return new Vector2Int(gridSize.x / 2, gridSize.y / 2 - 1);
         }
-
-        public List<Vector2Int> GetEmptyCells()
-        {
-            var result = new List<Vector2Int>();
-            for (int x = 0; x < gridSize.x; x++)
-                for (int y = 0; y < gridSize.y; y++)
-                    if (cells[x, y] == GridCellState.Empty)
-                        result.Add(new Vector2Int(x, y));
-            return result;
-        }
-
-        /// <summary>可生成的格子：Empty 但排除 Food 所在格</summary>
-        public List<Vector2Int> GetSpawnableCells()
-        {
-            return GetEmptyCells();
-        }
-
-        /// <summary>获取所有 Empty 且不是 Food 的格子</summary>
+        
+        /// <summary>获取所有空格且不在排除列表的格子</summary>
         public List<Vector2Int> GetSpawnableCells(HashSet<Vector2Int> excludePositions)
         {
-            List<Vector2Int> result = new List<Vector2Int>();
-            for (int x = 0; x < gridSize.x; x++)
-                for (int y = 0; y < gridSize.y; y++)
-                {
-                    Vector2Int pos = new Vector2Int(x, y);
-                    if (cells[x, y] == GridCellState.Empty && !excludePositions.Contains(pos)) result.Add(pos);
-                }
+            List<Vector2Int> result = new List<Vector2Int>(emptyCells.Count);
+            foreach (Vector2Int pos in emptyCells)
+            {
+                if (!excludePositions.Contains(pos)) result.Add(pos);
+            }
+            
             return result;
         }
 
