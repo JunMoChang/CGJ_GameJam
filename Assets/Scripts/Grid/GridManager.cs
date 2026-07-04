@@ -9,9 +9,12 @@ namespace Grid
         private GridCellState[,] cells;
         private Dictionary<Vector2Int, GameObject> cellObjects;
 
-        [Header("显示")]
+        [Header("棋盘显示")]
         [SerializeField] private float cellSize = 1f;
-        [SerializeField] private GameObject tilePrefab;
+
+        [Header("棋盘格 Prefab")]
+        [SerializeField] private GameObject tilePrefabA;
+        [SerializeField] private GameObject tilePrefabB;
 
         private Vector2 gridOrigin;
 
@@ -19,41 +22,53 @@ namespace Grid
         public int Height => gridSize.y;
         public float CellSize => cellSize;
         public Vector2 Origin => gridOrigin;
-
         public int EmptyCellCount { get; private set; }
 
         public void Init(Vector2Int size)
         {
-            if (cellObjects != null)
-            {
-                foreach (GameObject go in cellObjects.Values)
-                {
-                    if (go != null)
-                        Destroy(go);
-                }
-            }
+            ClearTiles();
 
             gridSize = size;
             cells = new GridCellState[size.x, size.y];
             cellObjects = new Dictionary<Vector2Int, GameObject>();
             EmptyCellCount = size.x * size.y;
 
-            // 自动居中：计算原点使网格中心在世界坐标 (0,0)
             gridOrigin.x = -(size.x * cellSize / 2f - cellSize / 2f);
             gridOrigin.y = -(size.y * cellSize / 2f - cellSize / 2f);
 
             for (int x = 0; x < size.x; x++)
+            {
                 for (int y = 0; y < size.y; y++)
                 {
                     cells[x, y] = GridCellState.Empty;
 
-                    if (tilePrefab != null)
-                    {
-                        Vector2Int pos = new Vector2Int(x, y);
-                        GameObject tile = Instantiate(tilePrefab, GridToWorld(pos), Quaternion.identity);
-                        cellObjects[pos] = tile;
-                    }
+                    Vector2Int pos = new Vector2Int(x, y);
+                    GameObject prefab = GetTilePrefab(x, y);
+
+                    if (prefab == null)
+                        continue;
+
+                    GameObject tile = Instantiate(prefab, GridToWorld(pos), Quaternion.identity, transform);
+                    tile.name = $"GridCell_{x}_{y}";
+                    tile.transform.localScale = new Vector3(cellSize, cellSize, 1f);
+
+                    cellObjects[pos] = tile;
                 }
+            }
+        }
+
+        private GameObject GetTilePrefab(int x, int y)
+        {
+            if (tilePrefabA == null && tilePrefabB == null)
+                return null;
+
+            if (tilePrefabA == null)
+                return tilePrefabB;
+
+            if (tilePrefabB == null)
+                return tilePrefabA;
+
+            return (x + y) % 2 == 0 ? tilePrefabA : tilePrefabB;
         }
 
         public bool IsInside(Vector2Int pos)
@@ -63,22 +78,26 @@ namespace Grid
 
         public GridCellState GetState(Vector2Int pos)
         {
-            if (!IsInside(pos)) return GridCellState.Empty;
+            if (!IsInside(pos))
+                return GridCellState.Empty;
+
             return cells[pos.x, pos.y];
         }
 
         public void SetState(Vector2Int pos, GridCellState currentState)
         {
-            if (!IsInside(pos)) return;
+            if (!IsInside(pos))
+                return;
 
             bool wasEmpty = cells[pos.x, pos.y] == GridCellState.Empty;
             bool isEmpty = currentState == GridCellState.Empty;
 
             cells[pos.x, pos.y] = currentState;
 
-            if (wasEmpty && !isEmpty) EmptyCellCount--;
-            else if (!wasEmpty && isEmpty) EmptyCellCount++;
-            Debug.Log(EmptyCellCount);
+            if (wasEmpty && !isEmpty)
+                EmptyCellCount--;
+            else if (!wasEmpty && isEmpty)
+                EmptyCellCount++;
         }
 
         public bool IsEmpty(Vector2Int pos)
@@ -86,16 +105,15 @@ namespace Grid
             return GetState(pos) == GridCellState.Empty;
         }
 
-        /// <summary>网格坐标 → 世界坐标（格子中心）</summary>
         public Vector3 GridToWorld(Vector2Int pos)
         {
             return new Vector3(
                 gridOrigin.x + pos.x * cellSize,
                 gridOrigin.y + pos.y * cellSize,
-                0f);
+                0f
+            );
         }
 
-        /// <summary>蛇头初始位置: 水平居中偏右、垂直居中</summary>
         public Vector2Int GetInitialHeadPosition()
         {
             return new Vector2Int(gridSize.x / 2, gridSize.y / 2 - 1);
@@ -103,49 +121,65 @@ namespace Grid
 
         public List<Vector2Int> GetEmptyCells()
         {
-            var result = new List<Vector2Int>();
+            List<Vector2Int> result = new();
+
             for (int x = 0; x < gridSize.x; x++)
+            {
                 for (int y = 0; y < gridSize.y; y++)
+                {
                     if (cells[x, y] == GridCellState.Empty)
                         result.Add(new Vector2Int(x, y));
+                }
+            }
+
             return result;
         }
 
-        /// <summary>可生成的格子：Empty 但排除 Food 所在格</summary>
         public List<Vector2Int> GetSpawnableCells()
         {
             return GetEmptyCells();
         }
 
-        /// <summary>获取所有 Empty 且不是 Food 的格子</summary>
         public List<Vector2Int> GetSpawnableCells(HashSet<Vector2Int> excludePositions)
         {
-            List<Vector2Int> result = new List<Vector2Int>();
+            List<Vector2Int> result = new();
+
             for (int x = 0; x < gridSize.x; x++)
+            {
                 for (int y = 0; y < gridSize.y; y++)
                 {
                     Vector2Int pos = new Vector2Int(x, y);
-                    if (cells[x, y] == GridCellState.Empty && !excludePositions.Contains(pos)) result.Add(pos);
+
+                    if (cells[x, y] == GridCellState.Empty && !excludePositions.Contains(pos))
+                        result.Add(pos);
                 }
+            }
+
             return result;
         }
 
-        /// <summary>蛇头 NxN 安全区内不得生成物品</summary>
         public bool IsInHeadSafeZone(Vector2Int pos, Vector2Int headPos, int safeZoneSize)
         {
             int half = safeZoneSize / 2;
-            return pos.x >= headPos.x - half && pos.x <= headPos.x + half
-                && pos.y >= headPos.y - half && pos.y <= headPos.y + half;
+
+            return pos.x >= headPos.x - half
+                && pos.x <= headPos.x + half
+                && pos.y >= headPos.y - half
+                && pos.y <= headPos.y + half;
         }
 
         public void ClearTiles()
         {
-            if (cellObjects != null)
+            if (cellObjects == null)
+                return;
+
+            foreach (GameObject go in cellObjects.Values)
             {
-                foreach (var go in cellObjects.Values)
-                    if (go != null) Destroy(go);
-                cellObjects.Clear();
+                if (go != null)
+                    Destroy(go);
             }
+
+            cellObjects.Clear();
         }
     }
 }
