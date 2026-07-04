@@ -38,7 +38,7 @@ namespace UI
             int stars = gm != null ? gm.CalculateStars(occ) : 0;
 
             if (titleText) titleText.text = "通关!";
-            if (resultText) resultText.text = $"蛇长: {len}  占用率: {occ:P1}";
+            if (resultText) resultText.text = $"蛇长: {len}\n占用率: {occ:P1}";
             ShowStars(stars);
             if (nextButton) nextButton.gameObject.SetActive(true);
             gameObject.SetActive(true);
