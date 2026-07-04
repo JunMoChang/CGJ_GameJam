@@ -36,6 +36,7 @@ namespace Core
         public GameState CurrentState { get; private set; } = GameState.MainMenu;
         public int CurrentLevelIndex { get; private set; }
         public LevelConfig CurrentLevelConfig => levelDatabase?.GetLevel(CurrentLevelIndex);
+        private bool hasReachedWinOccupancy;
 
         public event Action<GameState> OnStateChanged;
 
@@ -71,6 +72,7 @@ namespace Core
             if (cfg == null) return;
 
             CurrentLevelIndex = levelIndex;
+            hasReachedWinOccupancy = false;
 
             SetState(GameState.Playing);
 
@@ -102,17 +104,14 @@ namespace Core
 
         private void OnSnakeMoved(Vector2Int headPos)
         {
-            float occ = CalculateOccupancy();
-
-            if (occ >= winOccupancy)
-                SetState(GameState.Win);
+            if (CalculateOccupancy() >= winOccupancy) hasReachedWinOccupancy = true;
 
             obstacleManager?.TrySpawnRandomObstacle(headPos);
         }
 
         private void OnSnakeDead()
         {
-            SetState(GameState.Lose);
+            SetState(hasReachedWinOccupancy ? GameState.Win : GameState.Lose);
         }
 
         public float CalculateOccupancy()
