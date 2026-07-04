@@ -89,7 +89,6 @@ namespace Gameplay
                     var pos = new Vector2Int(x, y);
                     if (gridManager.GetState(pos) != Grid.GridCellState.Empty) continue;
                     if (gridManager.IsInHeadSafeZone(pos, snakeHeadPos, config.safeZoneSize)) continue;
-                    if (IsAdjacentToObstacle(pos)) continue;
                     candidates.Add(pos);
                 }
 
