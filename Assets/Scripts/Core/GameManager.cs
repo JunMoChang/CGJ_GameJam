@@ -3,6 +3,7 @@ using UnityEngine;
 using Config;
 using Gameplay;
 using Snake;
+using UI;
 
 namespace Core
 {
@@ -14,7 +15,7 @@ namespace Core
         Win,
         Lose
     }
-    
+
     public class GameManager : MonoBehaviour
     {
         public static GameManager Instance { get; private set; }
@@ -30,6 +31,7 @@ namespace Core
         [SerializeField] private Grid.GridManager gridManager;
         [SerializeField] private LevelSpawner levelSpawner;
         [SerializeField] private ObstacleManager obstacleManager;
+        [SerializeField] private TutorialPopupController tutorialPopupController;
 
         public GameState CurrentState { get; private set; } = GameState.MainMenu;
         public int CurrentLevelIndex { get; private set; }
@@ -39,7 +41,7 @@ namespace Core
 
         private void Awake()
         {
-            if (Instance == null) 
+            if (Instance == null)
                 Instance = this;
             else
                 Destroy(gameObject);
@@ -62,22 +64,30 @@ namespace Core
                 snakeController.OnDead -= OnSnakeDead;
             }
         }
-        
+
         public void StartLevel(int levelIndex)
         {
             LevelConfig cfg = levelDatabase?.GetLevel(levelIndex);
             if (cfg == null) return;
 
             CurrentLevelIndex = levelIndex;
+
             SetState(GameState.Playing);
+
             levelSpawner?.BuildLevel(cfg);
+
+            tutorialPopupController?.TryShowForLevel(cfg);
         }
-        
-        public void RestartLevel() => StartLevel(CurrentLevelIndex);
+
+        public void RestartLevel()
+        {
+            StartLevel(CurrentLevelIndex);
+        }
 
         public void LoadNextLevel()
         {
             int next = CurrentLevelIndex + 1;
+
             if (levelDatabase != null && next <= levelDatabase.LevelCount)
                 StartLevel(next);
             else
@@ -93,10 +103,10 @@ namespace Core
         private void OnSnakeMoved(Vector2Int headPos)
         {
             float occ = CalculateOccupancy();
+
             if (occ >= winOccupancy)
                 SetState(GameState.Win);
 
-            // 第 5 关随机岩石
             obstacleManager?.TrySpawnRandomObstacle(headPos);
         }
 
@@ -108,6 +118,7 @@ namespace Core
         public float CalculateOccupancy()
         {
             if (snakeController == null || gridManager == null) return 0f;
+
             int total = gridManager.Width * gridManager.Height;
             return total > 0 ? snakeController.Length / (float)total : 0f;
         }
@@ -122,6 +133,7 @@ namespace Core
         private void SetState(GameState state)
         {
             if (CurrentState == state) return;
+
             CurrentState = state;
 
             if (state == GameState.Playing)
