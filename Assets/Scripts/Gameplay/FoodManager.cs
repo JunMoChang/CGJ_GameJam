@@ -8,7 +8,7 @@ namespace Gameplay
     public class FoodManager : MonoBehaviour
     {
         [Header("预制体")]
-        public GameObject foodPrefab;
+        [SerializeField] private GameObject[] foodPrefabs;
 
         [Header("数量")]
         [SerializeField] private int richThreshold = 30;
@@ -16,12 +16,14 @@ namespace Gameplay
         [SerializeField] private int maxFoodWhenRich = 5;
 
         private Grid.GridManager gridManager;
+        private SnakeController snake;
         private readonly List<Vector2Int> foodPositions = new();
         private readonly Dictionary<Vector2Int, GameObject> foodVisuals = new();
 
-        public void Init(Grid.GridManager gm)
+        public void Init(Grid.GridManager gm, SnakeController snakeCtrl)
         {
             gridManager = gm;
+            snake = snakeCtrl;
             ClearAll();
         }
         
@@ -43,11 +45,9 @@ namespace Gameplay
             HashSet<Vector2Int> exclude = new HashSet<Vector2Int>();
             foreach (Vector2Int fp in foodPositions) exclude.Add(fp);
             
-            SnakeController snake = FindObjectOfType<SnakeController>();
-            if (snake != null)
+            foreach (Vector2Int bp in snake.BodyPositions)
             {
-                foreach (Vector2Int bp in snake.BodyPositions)
-                    exclude.Add(bp);
+                exclude.Add(bp);
             }
 
             List<Vector2Int> spawnable = gridManager.GetSpawnableCells(exclude);
@@ -64,9 +64,10 @@ namespace Gameplay
                 foodPositions.Add(pos);
                 gridManager.SetState(pos, Grid.GridCellState.Food);
 
-                if (foodPrefab != null)
+                if (foodPrefabs is { Length: > 0 })
                 {
-                    GameObject go = Instantiate(foodPrefab, gridManager.GridToWorld(pos), Quaternion.identity);
+                    GameObject prefab = foodPrefabs[Random.Range(0, foodPrefabs.Length)];
+                    GameObject go = Instantiate(prefab, gridManager.GridToWorld(pos), Quaternion.identity);
                     foodVisuals[pos] = go;
                 }
             }

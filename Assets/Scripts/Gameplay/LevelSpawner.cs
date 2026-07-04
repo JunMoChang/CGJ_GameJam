@@ -27,7 +27,7 @@ namespace Gameplay
             snakeController.Init(config.initialSnakeLength);
 
             // 食物
-            foodManager.Init(gridManager);
+            foodManager.Init(gridManager, snakeController);
             foodManager.RefreshFoods();
 
             // 岩石

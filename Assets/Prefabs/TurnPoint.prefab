@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3559753335713625402}
   - component: {fileID: 8392666164007046445}
   m_Layer: 0
-  m_Name: Body
+  m_Name: TurnPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -73,7 +73,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: dae2b5b418b381848bc9367bdf3d9ab8, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 173d8bd64795c904fa15ab948582e299, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
