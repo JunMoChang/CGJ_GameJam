@@ -23,25 +23,25 @@ namespace UI
         {
             gm = gameManager;
             snake = FindObjectOfType<SnakeController>();
+            targetText.text = "60%";
         }
 
         public void RefreshAll()
         {
             LevelConfig cfg = gm?.CurrentLevelConfig;
             if (cfg != null && levelText != null)
-                levelText.text = $"关卡 {cfg.levelIndex}";
+                levelText.text = $"第{cfg.level}关";
             if (attackTutorial != null && cfg != null)
                 attackTutorial.SetActive(cfg.enableAttackTutorial);
-            //targetText.text = $"{cfg.}"
         }
 
         private void Update()
         {
             if (gm == null || gm.CurrentState != Core.GameState.Playing) return;
             if (snake != null && lengthText != null)
-                lengthText.text = $"蛇长: {snake.Length}";
+                lengthText.text = $"{snake.Length}";
             if (occupancyText != null)
-                occupancyText.text = $"占用率: {gm.CalculateOccupancy():P1}";
+                occupancyText.text = $"{gm.CalculateOccupancy():P1}";
         }
     }
 }

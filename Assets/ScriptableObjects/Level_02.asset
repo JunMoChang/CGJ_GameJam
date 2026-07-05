@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50f79f5eb325a264faf920a6b1a6d43a, type: 3}
   m_Name: Level_02
   m_EditorClassIdentifier: 
-  levelIndex: 2
+  level: 2
   gridSize: {x: 8, y: 8}
   moveInterval: 1
   initialSnakeLength: 3
@@ -20,5 +20,6 @@ MonoBehaviour:
   maxInitialObstacles: 0
   enableRandomObstacleSpawn: 0
   randomObstacleChance: 0.1
+  maxObstacleProportionOfEmptyGrid: 0.2
   safeZoneSize: 5
   enableAttackTutorial: 0

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50f79f5eb325a264faf920a6b1a6d43a, type: 3}
   m_Name: Level_05
   m_EditorClassIdentifier: 
-  levelIndex: 5
+  level: 5
   gridSize: {x: 14, y: 14}
   moveInterval: 1
   initialSnakeLength: 3

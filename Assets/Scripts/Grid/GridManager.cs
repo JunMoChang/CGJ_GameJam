@@ -60,6 +60,7 @@ namespace Grid
                         Vector2Int pos = new Vector2Int(x, y);
                         int idx = (x + y) % tilePrefab.Length;
                         GameObject tile = Instantiate(tilePrefab[idx], GridToWorld(pos), Quaternion.identity);
+                        //tile.transform.localScale = Vector3.one * 1.01f; // 消除 tile 间隙
                         cellObjects[pos] = tile;
                     }
                 }
@@ -92,10 +93,14 @@ namespace Grid
         /// <summary>网格坐标 → 世界坐标（格子中心）</summary>
         public Vector3 GridToWorld(Vector2Int pos)
         {
-            return new Vector3(
-                gridOrigin.x + pos.x * cellSize,
-                gridOrigin.y + pos.y * cellSize,
-                0f);
+            return new Vector3(gridOrigin.x + pos.x * cellSize, gridOrigin.y + pos.y * cellSize, 0f);
+        }
+
+        public Vector2Int WorldToGrid(Vector3 worldPos)
+        {
+            int x = Mathf.RoundToInt((worldPos.x - Origin.x) / CellSize);
+            int y = Mathf.RoundToInt((worldPos.y - Origin.y) / CellSize);
+            return new Vector2Int(x, y);
         }
 
         /// <summary>蛇头初始位置</summary>

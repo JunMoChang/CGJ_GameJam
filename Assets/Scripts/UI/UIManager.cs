@@ -1,15 +1,17 @@
 using Core;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace UI
 {
     public class UIManager : MonoBehaviour
     {
         [Header("面板引用")]
+        [SerializeField] private GameObject startScreen;
         [SerializeField] private MainMenuController mainMenu;
         [SerializeField] private HUDController hud;
         [SerializeField] private ResultPanel resultPanel;
-
+        [SerializeField] private Button startButton;
         private GameManager gm;
 
         private void Start()
@@ -20,7 +22,7 @@ namespace UI
             resultPanel?.Init(gm);
 
             gm.OnStateChanged += OnGameStateChanged;
-            ShowMainMenu();
+            ShowStartScreen();
         }
 
         private void OnDestroy()
@@ -33,6 +35,9 @@ namespace UI
         {
             switch (state)
             {
+                case GameState.StartMenu:
+                    ShowStartScreen();
+                    break;
                 case GameState.MainMenu:
                     ShowMainMenu();
                     break;
@@ -46,8 +51,18 @@ namespace UI
             }
         }
 
+        private void ShowStartScreen()
+        {
+            startButton.gameObject.SetActive(true);
+            if (startScreen) startScreen.SetActive(true);
+            mainMenu?.gameObject.SetActive(false);
+            if (hud) hud.gameObject.SetActive(false);
+            resultPanel?.Hide();
+        }
+
         private void ShowMainMenu()
         {
+            if (startScreen) startScreen.SetActive(false);
             mainMenu?.gameObject.SetActive(true);
             if (hud) hud.gameObject.SetActive(false);
             resultPanel?.Hide();
@@ -66,7 +81,6 @@ namespace UI
 
         private void ShowResult(bool win)
         {
-            //if (hud) hud.gameObject.SetActive(false);
             if (win)
                 resultPanel?.ShowWin();
             else

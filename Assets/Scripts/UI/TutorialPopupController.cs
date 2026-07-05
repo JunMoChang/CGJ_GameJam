@@ -14,7 +14,7 @@ namespace UI
         public void TryShowForLevel(LevelConfig config)
         {
             if (config == null) return;
-            if (config.levelIndex != 3) return;
+            if (config.level != 3) return;
             if (!config.enableAttackTutorial) return;
 
             Show();

@@ -6,7 +6,7 @@ namespace Config
     public class LevelConfig : ScriptableObject
     {
         [Header("关卡基础")]
-        public int levelIndex;
+        public int level;
         public Vector2Int gridSize = new(8, 8);
         public float moveInterval = 1f;
 

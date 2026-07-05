@@ -11,7 +11,7 @@ namespace Config
         {
             foreach (var lv in levels)
             {
-                if (lv != null && lv.levelIndex == levelIndex)
+                if (lv != null && lv.level == levelIndex)
                     return lv;
             }
             return null;

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Gameplay;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Snake
 {
@@ -17,30 +16,32 @@ namespace Snake
         [SerializeField] private Sprite bodyImage;
         [SerializeField] private Sprite trailImage;
         [SerializeField] private Sprite turnPointImage;
-
+        [SerializeField] private GameObject bulletPrefab;
+        
         [Header("攻击")]
         [SerializeField] private int attackRange = 2;
-        [SerializeField] private float attackCooldown = 0.35f;
+        [SerializeField] private float attackCooldown = 0.6f;
 
         [Header("引用")]
         [SerializeField] private Grid.GridManager gridManager;
         [SerializeField] private ObstacleManager obstacleManager;
         
         public event Action<int> OnLengthChanged;// 蛇长变化
-        public event Action OnDead;// 死亡
-        public event Action<Vector2Int> OnMoved;// 每次移动后，传蛇头坐标
-        public event Action<Vector2Int> OnFoodEaten;// 吃到食物，传食物坐标
-        public event Action<Vector2Int> OnObstacleDestroyed;// 攻击破坏岩石
+        public event Action OnDead;//死亡
+        public event Action<Vector2Int> OnMoved;//每次移动后，传蛇头坐标
+        public event Action<Vector2Int> OnFoodEaten;//吃到食物，传食物坐标
+        public event Action<Vector2Int> OnObstacleDestroyed;//攻击破坏岩石
+        public event Action OnAttack;//攻击
         
         
         private readonly LinkedList<Vector2Int> bodyList = new();
         private readonly HashSet<Vector2Int> bodySet = new();
         private GameObject headVisual;
-        private readonly LinkedList<GameObject> bodyVisuals = new(); // 与 bodyList 去掉表头后的部分严格一一对应
+        private readonly LinkedList<GameObject> bodyVisuals = new(); // 与 bodyList 去掉表头后的部分一一对应
 
         private Vector2Int currentDirection = Vector2Int.right;
         private Vector2Int pendingDirection = Vector2Int.right;
-        private Vector2Int previousDirection = Vector2Int.right; // 上一次 Tick 使用的方向，用于计算新生成那一节的转弯形状
+        private Vector2Int previousDirection = Vector2Int.right;
 
         private float tickTimer;
         private float lastAttackTime;
@@ -148,14 +149,14 @@ namespace Snake
             
             Vector2Int candidate = Mathf.Abs(raw.x) >= Mathf.Abs(raw.y) ? raw.x > 0 ? Vector2Int.right : Vector2Int.left : raw.y > 0 ? Vector2Int.up : Vector2Int.down;
             
-            if (candidate == -currentDirection) return;
+            if (candidate == -currentDirection) return;//禁止180转弯
 
             pendingDirection = candidate;
         }
 
         #endregion
 
-        #region 核心 Tick
+        #region Tick
 
         private void Tick()
         {
@@ -188,8 +189,7 @@ namespace Snake
                 Die();
                 return;
             }
-
-            // 更新蛇头
+            
             gridManager.SetState(oldHeadPos, Grid.GridCellState.SnakeBody);
 
             bodyList.AddFirst(newHead);
@@ -200,10 +200,10 @@ namespace Snake
             // 移除尾部或增长
             if (!ateFood)
             {
-                Vector2Int removed = bodyList.Last.Value;
+                Vector2Int removedPos= bodyList.Last.Value;
                 bodyList.RemoveLast();
-                bodySet.Remove(removed);
-                gridManager.SetState(removed, Grid.GridCellState.Empty);
+                bodySet.Remove(removedPos);
+                gridManager.SetState(removedPos, Grid.GridCellState.Empty);
 
                 AdvanceVisuals(oldHeadPos);
             }
@@ -225,22 +225,18 @@ namespace Snake
         private void TryAttack()
         {
             if (bodyList.Count == 0) return;
-            if (obstacleManager == null) return;
             if (Time.time - lastAttackTime < attackCooldown) return;
 
             lastAttackTime = Time.time;
-            Vector2Int head = bodyList.First.Value;
 
-            for (int i = 1; i <= attackRange; i++)
-            {
-                Vector2Int target = head + currentDirection * i;
-                if (obstacleManager.DestroyObstacle(target))
-                {
-                    Debug.Log($"Destroyed obstacle at {target}");
-                    OnObstacleDestroyed?.Invoke(target);
-                    return;
-                }
-            }
+            if (bulletPrefab == null) return;
+
+            Vector3 spawnPos = gridManager.GridToWorld(bodyList.First.Value);
+            OnAttack?.Invoke();
+
+            GameObject bulletGo = Instantiate(bulletPrefab, spawnPos, Quaternion.identity);
+            Bullet bullet = bulletGo.GetComponent<Bullet>();
+            if (bullet != null) bullet.Init(currentDirection, obstacleManager, gridManager, pos => OnObstacleDestroyed?.Invoke(pos));
         }
 
         #endregion
@@ -257,17 +253,16 @@ namespace Snake
 
         #region 显示
 
-        // 头部视觉：每帧都需要重新定位定向，本身没有身份延续问题
+        // 头部视觉
         private void UpdateHeadVisual()
         {
-            if (gridManager == null) return;
             if (headVisual == null) headVisual = Instantiate(headPrefab);
 
             headVisual.transform.position = gridManager.GridToWorld(bodyList.First.Value);
             headVisual.transform.rotation = Quaternion.Euler(0, 0, DirectionToAngle(currentDirection));
         }
 
-        // 给一节身体贴图/旋转赋值。headSideDir = 指向头侧邻居的方向，tailSideDir = 指向尾侧邻居的方向（尾巴时无意义，传 Vector2Int.zero 即可）
+        // 给一节身体贴图/旋转赋值。headSideDir = 指向头侧邻居的方向，tailSideDir = 指向尾侧邻居的方向
         private void ApplySegmentVisual(SpriteRenderer sr, Vector2Int headSideDir, Vector2Int tailSideDir, bool isTail)
         {
             if (isTail)
@@ -295,35 +290,34 @@ namespace Snake
         // 新尾巴（原倒数第二节）头侧方向
         private Vector2Int GetTailHeadSideDirection()
         {
-            var tailNode = bodyList.Last;
+            LinkedListNode<Vector2Int> tailNode = bodyList.Last;
             if (tailNode == null || tailNode.Previous == null) return currentDirection;
             return tailNode.Previous.Value - tailNode.Value;
         }
 
-        // 前进一格、不增长：把链表尾部对象摘下复用，变成新长出的第一节身体；
+        // 把链表尾部对象摘下复用，变成新长出的第一节身体
         private void AdvanceVisuals(Vector2Int oldHeadPos)
         {
             UpdateHeadVisual();
             if (bodyVisuals.Count == 0) return;
 
-            GameObject reused = bodyVisuals.Last.Value;
+            GameObject reusedBody = bodyVisuals.Last.Value;
             bodyVisuals.RemoveLast();
 
-            bool becomesOnlySegment = bodyVisuals.Count == 0; // 摘掉之后链表空了，说明这一节移动后是唯一一节身体，身份应该是尾巴
-            bodyVisuals.AddFirst(reused);
+            bool becomesOnlySegment = bodyVisuals.Count == 0;
+            bodyVisuals.AddFirst(reusedBody);
 
-            reused.transform.position = gridManager.GridToWorld(oldHeadPos);
-            SpriteRenderer reusedSr = reused.GetComponent<SpriteRenderer>();
+            reusedBody.transform.position = gridManager.GridToWorld(oldHeadPos);
+            SpriteRenderer reusedSr = reusedBody.GetComponent<SpriteRenderer>();
             if (reusedSr != null)
             {
-                // 新的第一节身体：头侧方向是这一帧的移动方向，尾侧方向是上一帧移动方向的反方向
                 ApplySegmentVisual(reusedSr, currentDirection, -previousDirection, becomesOnlySegment);
             }
 
             if (!becomesOnlySegment)
             {
-                GameObject newTailGo = bodyVisuals.Last.Value;
-                SpriteRenderer tailSr = newTailGo.GetComponent<SpriteRenderer>();
+                GameObject newTail = bodyVisuals.Last.Value;
+                SpriteRenderer tailSr = newTail.GetComponent<SpriteRenderer>();
                 if (tailSr != null)
                 {
                     ApplySegmentVisual(tailSr, GetTailHeadSideDirection(), Vector2Int.zero, isTail: true);
@@ -331,12 +325,12 @@ namespace Snake
             }
         }
 
-        // 前进一格、吃到食物增长：只在旧蛇头位置新建一节身体，插到链表头部；
+        // 在旧蛇头位置新建一节身体，插到链表头部
         private void GrowVisuals(Vector2Int oldHeadPos)
         {
             UpdateHeadVisual();
 
-            bool wasEmpty = bodyVisuals.Count == 0; // 原来身体只有0节（蛇长为1），新长出的这节同时也是尾巴
+            bool wasEmpty = bodyVisuals.Count == 0;
             GameObject newSegment = Instantiate(bodyPrefab);
             bodyVisuals.AddFirst(newSegment);
 
@@ -360,12 +354,12 @@ namespace Snake
 
             for (int i = 1; i < nodes.Count; i++)
             {
-                GameObject go = Instantiate(bodyPrefab);
-                bodyVisuals.AddLast(go);
+                GameObject body = Instantiate(bodyPrefab);
+                bodyVisuals.AddLast(body);
 
-                go.transform.position = gridManager.GridToWorld(nodes[i]);
+                body.transform.position = gridManager.GridToWorld(nodes[i]);
 
-                SpriteRenderer sr = go.GetComponent<SpriteRenderer>();
+                SpriteRenderer sr = body.GetComponent<SpriteRenderer>();
                 if (sr == null) continue;
 
                 Vector2Int headSideDir = nodes[i - 1] - nodes[i];
@@ -374,19 +368,13 @@ namespace Snake
                 ApplySegmentVisual(sr, headSideDir, tailSideDir, isTail: i == tailIndex);
             }
         }
-
-        // 直行/尾部的旋转：Up→0° Down→180° Left→90° Right→-90°
+        
         private float TrailAngle(Vector2Int dir)
         {
             return DirectionToAngle(dir);
         }
         
-        // 基准图（不翻转）对应 headSideDir/tailSideDir = {left, down} 这一组合
-        // （等价于：向右移动转向下 或 向上移动转向左）。
-        // headSideDir、tailSideDir 在转弯处必然一横一竖，所以只需分别判断
-        // 这一横一竖里是否出现了 right / up：
-        //   出现 right → 水平翻转（对应基准里的 left）
-        //   出现 up    → 垂直翻转（对应基准里的 down）
+        // 基准图对应 headSideDir/tailSideDir = {right, down}
         private void ApplyTurnFlip(SpriteRenderer sr, Vector2Int headSideDir, Vector2Int tailSideDir)
         {
             bool hasRight = headSideDir == Vector2Int.right || tailSideDir == Vector2Int.right;
@@ -398,23 +386,31 @@ namespace Snake
 
         private float DirectionToAngle(Vector2Int dir)
         {
-            if (dir == Vector2Int.up)    return 0f;
-            if (dir == Vector2Int.down)  return 180f;
-            if (dir == Vector2Int.left)  return 90f;
+            if (dir == Vector2Int.up) return 0f;
+            if (dir == Vector2Int.down) return 180f;
+            if (dir == Vector2Int.left) return 90f;
             if (dir == Vector2Int.right) return -90f;
             return 0f;
         }
 
         private void ClearBodyVisuals()
         {
-            foreach (var go in bodyVisuals)
+            foreach (GameObject go in bodyVisuals)
+            {
                 if (go != null) Destroy(go);
+            }
+            
             bodyVisuals.Clear();
         }
 
         public void ClearVisuals()
         {
-            if (headVisual != null) { Destroy(headVisual); headVisual = null; }
+            if (headVisual != null)
+            {
+                Destroy(headVisual);
+                headVisual = null;
+            }
+            
             ClearBodyVisuals();
         }
 

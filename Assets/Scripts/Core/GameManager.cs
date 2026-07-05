@@ -9,6 +9,7 @@ namespace Core
 {
     public enum GameState
     {
+        StartMenu,
         MainMenu,
         Playing,
         Paused,
@@ -33,7 +34,7 @@ namespace Core
         [SerializeField] private ObstacleManager obstacleManager;
         [SerializeField] private TutorialPopupController tutorialPopupController;
 
-        public GameState CurrentState { get; private set; } = GameState.MainMenu;
+        public GameState CurrentState { get; private set; } = GameState.StartMenu;
         public int CurrentLevelIndex { get; private set; }
         public LevelConfig CurrentLevelConfig => levelDatabase?.GetLevel(CurrentLevelIndex);
         private bool hasReachedWinOccupancy;
@@ -64,6 +65,12 @@ namespace Core
                 snakeController.OnMoved -= OnSnakeMoved;
                 snakeController.OnDead -= OnSnakeDead;
             }
+        }
+
+        public void GoToMainMenu()
+        {
+            SetState(GameState.MainMenu);
+            
         }
 
         public void StartLevel(int levelIndex)
@@ -124,8 +131,8 @@ namespace Core
 
         public int CalculateStars(float occupancy)
         {
-            if (occupancy >= 0.7f) return 3;
-            if (occupancy >= 0.5f) return 2;
+            if (occupancy >= 0.6f) return 3;
+            if (occupancy >= 0.45f) return 2;
             return 1;
         }
 
