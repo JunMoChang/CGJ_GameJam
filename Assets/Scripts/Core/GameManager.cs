@@ -81,10 +81,10 @@ namespace Core
             CurrentLevelIndex = levelIndex;
             hasReachedWinOccupancy = false;
 
-            SetState(GameState.Playing);
-
             levelSpawner?.BuildLevel(cfg);
 
+            SetState(GameState.Playing);
+            
             tutorialPopupController?.TryShowForLevel(cfg);
         }
 

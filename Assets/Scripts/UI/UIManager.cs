@@ -12,23 +12,22 @@ namespace UI
         [SerializeField] private HUDController hud;
         [SerializeField] private ResultPanel resultPanel;
         [SerializeField] private Button startButton;
-        private GameManager gm;
+        private GameManager gameManager;
 
         private void Start()
         {
-            gm = GameManager.Instance;
-            mainMenu?.Init(gm);
-            hud?.Init(gm);
-            resultPanel?.Init(gm);
+            gameManager = GameManager.Instance;
+            mainMenu?.Init(gameManager);
+            hud?.Init(gameManager);
+            resultPanel?.Init(gameManager);
 
-            gm.OnStateChanged += OnGameStateChanged;
+            gameManager.OnStateChanged += OnGameStateChanged;
             ShowStartScreen();
         }
 
         private void OnDestroy()
         {
-            if (gm != null)
-                gm.OnStateChanged -= OnGameStateChanged;
+            if (gameManager != null) gameManager.OnStateChanged -= OnGameStateChanged;
         }
 
         private void OnGameStateChanged(GameState state)
@@ -72,11 +71,8 @@ namespace UI
         {
             mainMenu?.gameObject.SetActive(false);
             resultPanel?.Hide();
-            if (hud)
-            {
-                hud.gameObject.SetActive(true);
-                hud.RefreshAll();
-            }
+            
+            hud.Show();
         }
 
         private void ShowResult(bool win)

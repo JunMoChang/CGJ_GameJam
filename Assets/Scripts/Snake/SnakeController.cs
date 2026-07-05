@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Config;
 using Gameplay;
 using UnityEngine;
 
@@ -64,14 +65,7 @@ namespace Snake
             if (InputManager.Instance != null)
                 InputManager.Instance.OnInputPressed -= HandleInputPressed;
         }
-
-        private void HandleInputPressed(string actionName)
-        {
-            if (isGameOver) return;
-            if (actionName != "Attack") return;
-            TryAttack();
-        }
-
+        
         private void Update()
         {
             if (isGameOver || bodyList.Count == 0) return;
@@ -140,7 +134,7 @@ namespace Snake
 
         #endregion
 
-        #region 方向输入
+        #region 输入
 
         private void ReadDirectionInput()
         {
@@ -152,6 +146,17 @@ namespace Snake
             if (candidate == -currentDirection) return;//禁止180转弯
 
             pendingDirection = candidate;
+        }
+        
+        private void HandleInputPressed(string actionName)
+        {
+            if (isGameOver) return;
+            if (actionName != "Attack") return;
+
+            LevelConfig cfg = Core.GameManager.Instance?.CurrentLevelConfig;
+            if (cfg == null || !cfg.enableAttack) return;
+
+            TryAttack();
         }
 
         #endregion
@@ -225,6 +230,7 @@ namespace Snake
         private void TryAttack()
         {
             if (bodyList.Count == 0) return;
+            
             if (Time.time - lastAttackTime < attackCooldown) return;
 
             lastAttackTime = Time.time;

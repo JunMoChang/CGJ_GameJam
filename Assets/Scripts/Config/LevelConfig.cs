@@ -27,5 +27,8 @@ namespace Config
 
         [Header("教学")]
         public bool enableAttackTutorial;
+
+        [Header("攻击")]
+        public bool enableAttack = true;
     }
 }
