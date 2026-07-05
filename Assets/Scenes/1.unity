@@ -1223,7 +1223,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bda5e3482ecd96a449d6a6692ad24be4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tickInterval: 0.1
+  tickInterval: 1
   headPrefab: {fileID: 7138284203755226207, guid: 9d8a45e9932180c489dc71ec44724636, type: 3}
   bodyPrefab: {fileID: 3472317938520286152, guid: b89e01d714e27db42b3686d258c2e5fc, type: 3}
   bodyImage: {fileID: 21300000, guid: 0baa6ab6bc391274fa373926ff8ef4fc, type: 3}

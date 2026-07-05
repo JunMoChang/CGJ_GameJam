@@ -7,7 +7,7 @@ namespace Grid
     {
         private Vector2Int gridSize;
         private GridCellState[,] cells;
-        private Dictionary<Vector2Int, GameObject> cellObjects;
+        private List<GameObject> cellObjects;
         private HashSet<Vector2Int> emptyCells;
 
         [Header("显示")]
@@ -27,17 +27,16 @@ namespace Grid
         {
             if (cellObjects != null)
             {
-                foreach (GameObject go in cellObjects.Values)
+                foreach (GameObject go in cellObjects)
                 {
-                    if (go != null)
-                        Destroy(go);
+                    if (go != null) Destroy(go);
                 }
             }
 
             gridSize = size;
             cells = new GridCellState[size.x, size.y];
-            cellObjects = new Dictionary<Vector2Int, GameObject>();
             EmptyCellCount = size.x * size.y;
+            cellObjects = new List<GameObject>(EmptyCellCount);
             emptyCells = new HashSet<Vector2Int>(EmptyCellCount);
             for (int x = 0; x < size.x; x++)
             {
@@ -60,8 +59,7 @@ namespace Grid
                         Vector2Int pos = new Vector2Int(x, y);
                         int idx = (x + y) % tilePrefab.Length;
                         GameObject tile = Instantiate(tilePrefab[idx], GridToWorld(pos), Quaternion.identity);
-                        //tile.transform.localScale = Vector3.one * 1.01f; // 消除 tile 间隙
-                        cellObjects[pos] = tile;
+                        cellObjects.Add(tile);
                     }
                 }
         }
@@ -133,8 +131,10 @@ namespace Grid
         {
             if (cellObjects != null)
             {
-                foreach (var go in cellObjects.Values)
+                foreach (GameObject go in cellObjects)
+                {
                     if (go != null) Destroy(go);
+                }
                 cellObjects.Clear();
             }
         }

@@ -31,7 +31,7 @@ namespace Gameplay
         {
             foodPositions.Remove(pos);
 
-            if (foodVisuals.TryGetValue(pos, out var go))
+            if (foodVisuals.TryGetValue(pos, out GameObject go))
             {
                 if (go != null) Destroy(go);
                 foodVisuals.Remove(pos);

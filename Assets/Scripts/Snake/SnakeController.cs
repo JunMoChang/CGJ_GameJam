@@ -51,7 +51,6 @@ namespace Snake
         public Vector2Int HeadPosition => bodyList.Count > 0 ? bodyList.First.Value : Vector2Int.zero;
         public IReadOnlyCollection<Vector2Int> BodyPositions => bodySet;
         public int Length => bodyList.Count;
-        public bool IsRunning => !isGameOver;
         public Vector2Int CurrentDirection => currentDirection;
 
         private void OnEnable()
@@ -276,14 +275,14 @@ namespace Snake
                 sr.sprite = trailImage;
                 sr.flipX = false;
                 sr.flipY = false;
-                sr.transform.rotation = Quaternion.Euler(0, 0, TrailAngle(headSideDir));
+                sr.transform.rotation = Quaternion.Euler(0, 0, DirectionToAngle(headSideDir));
             }
             else if (headSideDir == -tailSideDir)
             {
                 sr.sprite = bodyImage;
                 sr.flipX = false;
                 sr.flipY = false;
-                sr.transform.rotation = Quaternion.Euler(0, 0, TrailAngle(headSideDir));
+                sr.transform.rotation = Quaternion.Euler(0, 0, DirectionToAngle(headSideDir));
             }
             else
             {
@@ -373,11 +372,6 @@ namespace Snake
 
                 ApplySegmentVisual(sr, headSideDir, tailSideDir, isTail: i == tailIndex);
             }
-        }
-        
-        private float TrailAngle(Vector2Int dir)
-        {
-            return DirectionToAngle(dir);
         }
         
         // 基准图对应 headSideDir/tailSideDir = {right, down}

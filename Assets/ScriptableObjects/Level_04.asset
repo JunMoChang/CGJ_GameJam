@@ -23,3 +23,4 @@ MonoBehaviour:
   maxObstacleProportionOfEmptyGrid: 0.2
   safeZoneSize: 5
   enableAttackTutorial: 0
+  enableAttack: 1
