@@ -153,6 +153,8 @@ namespace Core
             if (CurrentState == state) return;
 
             CurrentState = state;
+            
+            Time.timeScale = state == GameState.Paused ? 0f : 1f;
 
             if (state == GameState.Playing)
                 snakeController?.StartMove();

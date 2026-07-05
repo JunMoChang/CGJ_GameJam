@@ -62,3 +62,6 @@ TagManager:
   - name: Obstacle
     uniqueID: 364649331
     locked: 0
+  - name: Overlay
+    uniqueID: 3123944959
+    locked: 0
