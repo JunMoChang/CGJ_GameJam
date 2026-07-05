@@ -25,23 +25,23 @@ namespace UI
         [SerializeField] private Button menuButton;
         
         [SerializeField] private GameObject mask;
-        private Core.GameManager gm;
+        private Core.GameManager gameManager;
 
-        public void Init(Core.GameManager gameManager)
+        public void Init(Core.GameManager _gameManager)
         {
-            gm = gameManager;
+            gameManager = _gameManager;
             background = GetComponent<Image>();
-            if (retryButton) retryButton.onClick.AddListener(() => gm?.RestartLevel());
-            if (nextButton) nextButton.onClick.AddListener(() => gm?.LoadNextLevel());
-            if (menuButton) menuButton.onClick.AddListener(() => gm?.ReturnToMenu());
+            if (retryButton) retryButton.onClick.AddListener(() => gameManager?.RestartLevel());
+            if (nextButton) nextButton.onClick.AddListener(() => gameManager?.LoadNextLevel());
+            if (menuButton) menuButton.onClick.AddListener(() => gameManager?.ReturnToMenu());
         }
 
         public void ShowWin()
         {
-            var snake = FindObjectOfType<SnakeController>();
+            SnakeController snake = FindObjectOfType<SnakeController>();
             int len = snake != null ? snake.Length : 0;
-            float occ = gm != null ? gm.CalculateOccupancy() : 0f;
-            int stars = gm != null ? gm.CalculateStars(occ) : 0;
+            float occ = gameManager != null ? gameManager.CalculateOccupancy() : 0f;
+            int stars = gameManager != null ? gameManager.CalculateStars(occ) : 0;
 
             if (lengthText) lengthText.text = $"猫长: {len}";
             if (resultText) resultText.text = $"占用率: {occ:P1}";
@@ -54,9 +54,9 @@ namespace UI
 
         public void ShowLose()
         {
-            var snake = FindObjectOfType<SnakeController>();
+            SnakeController snake = FindObjectOfType<SnakeController>();
             int len = snake != null ? snake.Length : 0;
-            float occ = gm != null ? gm.CalculateOccupancy() : 0f;
+            float occ = gameManager != null ? gameManager.CalculateOccupancy() : 0f;
 
             if (lengthText) lengthText.text = $"猫长: {len}";
             if (resultText) resultText.text = $"占用率: {occ:P1}";
