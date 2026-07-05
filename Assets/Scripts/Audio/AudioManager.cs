@@ -157,22 +157,12 @@ namespace Audio
 
         private void OnAttack()
         {
-            if (attackSource != null)
-                attackSource.Play();
+            attackSource.Play();
         }
 
         #endregion
 
-        #region 公开 API
-
-        public void PlayEat()    => PlaySfx(eatClip);
-        public void PlayAttack() => OnAttack();
-        public void PlayWin()    => PlaySfx(winClip);
-        public void PlayLose()   => PlaySfx(loseClip);
-
-        #endregion
-
-        #region 内部播放
+        #region 播放
 
         private void PlaySfx(AudioClip clip)
         {

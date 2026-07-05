@@ -197,7 +197,7 @@
                     "name": "Back",
                     "type": "Button",
                     "id": "b1a2c3d4-e273-484b-abe7-bc173cf41001",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -206,7 +206,7 @@
                     "name": "OpenInventory",
                     "type": "Button",
                     "id": "b1a2c3d4-e273-484b-abe7-bc173cf41002",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -215,7 +215,7 @@
                     "name": "OpenEquipment",
                     "type": "Button",
                     "id": "b1a2c3d4-e273-484b-abe7-bc173cf41003",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true

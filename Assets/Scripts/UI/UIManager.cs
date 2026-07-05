@@ -11,7 +11,9 @@ namespace UI
         [SerializeField] private MainMenuController mainMenu;
         [SerializeField] private HUDController hud;
         [SerializeField] private ResultPanel resultPanel;
+        [SerializeField] private GameObject pauseOverlay;
         [SerializeField] private Button startButton;
+
         private GameManager gameManager;
 
         private void Start()
@@ -22,12 +24,35 @@ namespace UI
             resultPanel?.Init(gameManager);
 
             gameManager.OnStateChanged += OnGameStateChanged;
+
+            if (InputManager.Instance != null)
+                InputManager.Instance.OnInputPressed += OnInputPressed;
+
             ShowStartScreen();
         }
 
         private void OnDestroy()
         {
-            if (gameManager != null) gameManager.OnStateChanged -= OnGameStateChanged;
+            if (gameManager != null)
+                gameManager.OnStateChanged -= OnGameStateChanged;
+
+            if (InputManager.Instance != null)
+                InputManager.Instance.OnInputPressed -= OnInputPressed;
+        }
+
+        private void OnInputPressed(string actionName)
+        {
+            if (actionName != "Back") return;
+
+            switch (gameManager.CurrentState)
+            {
+                case GameState.Playing:
+                    gameManager.Pause();
+                    break;
+                case GameState.Paused:
+                    gameManager.Resume();
+                    break;
+            }
         }
 
         private void OnGameStateChanged(GameState state)
@@ -43,6 +68,9 @@ namespace UI
                 case GameState.Playing:
                     ShowHUD();
                     break;
+                case GameState.Paused:
+                    ShowPauseOverlay();
+                    break;
                 case GameState.Win:
                 case GameState.Lose:
                     ShowResult(state == GameState.Win);
@@ -57,6 +85,7 @@ namespace UI
             mainMenu?.gameObject.SetActive(false);
             if (hud) hud.gameObject.SetActive(false);
             resultPanel?.Hide();
+            if (pauseOverlay) pauseOverlay.SetActive(false);
         }
 
         private void ShowMainMenu()
@@ -65,14 +94,21 @@ namespace UI
             mainMenu?.gameObject.SetActive(true);
             if (hud) hud.gameObject.SetActive(false);
             resultPanel?.Hide();
+            if (pauseOverlay) pauseOverlay.SetActive(false);
         }
 
         private void ShowHUD()
         {
             mainMenu?.gameObject.SetActive(false);
             resultPanel?.Hide();
-            
+            if (pauseOverlay) pauseOverlay.SetActive(false);
+
             hud.Show();
+        }
+
+        private void ShowPauseOverlay()
+        {
+            if (pauseOverlay) pauseOverlay.SetActive(true);
         }
 
         private void ShowResult(bool win)

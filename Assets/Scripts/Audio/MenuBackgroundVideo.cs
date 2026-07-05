@@ -9,7 +9,7 @@ namespace Audio
         [SerializeField] private VideoPlayer videoPlayer;
         [SerializeField] private RenderTexture sharedRT;
         [SerializeField] private VideoClip[] candidateClips;
-        private GameManager gm;
+        private GameManager gameManager;
 
         private void Awake()
         {
@@ -21,17 +21,16 @@ namespace Audio
 
         private void Start()
         {
-            gm = GameManager.Instance;
-            if (gm != null)
-                gm.OnStateChanged += OnStateChanged;
+            gameManager = GameManager.Instance;
+            if (gameManager != null) gameManager.OnStateChanged += OnStateChanged;
 
             Play(0);
         }
 
         private void OnDestroy()
         {
-            if (gm != null)
-                gm.OnStateChanged -= OnStateChanged;
+            if (gameManager != null)
+                gameManager.OnStateChanged -= OnStateChanged;
         }
 
         private void OnStateChanged(GameState state)

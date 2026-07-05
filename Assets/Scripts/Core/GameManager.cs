@@ -109,6 +109,18 @@ namespace Core
             SetState(GameState.MainMenu);
         }
 
+        public void Pause()
+        {
+            if (CurrentState == GameState.Playing)
+                SetState(GameState.Paused);
+        }
+
+        public void Resume()
+        {
+            if (CurrentState == GameState.Paused)
+                SetState(GameState.Playing);
+        }
+
         private void OnSnakeMoved(Vector2Int headPos)
         {
             if (CalculateOccupancy() >= winOccupancy) hasReachedWinOccupancy = true;
